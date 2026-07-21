@@ -21,7 +21,7 @@ public class EntryTicketEntity {
     @Column(nullable = false, unique = true, length = 32)
     private String code;
 
-    // TODO: issuedAt, usedAt, status (@Enumerated(EnumType.STRING)) + getters/setters
+    // Pendiente de implementacion: issuedAt, usedAt, status (@Enumerated(EnumType.STRING)) + getters/setters
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
