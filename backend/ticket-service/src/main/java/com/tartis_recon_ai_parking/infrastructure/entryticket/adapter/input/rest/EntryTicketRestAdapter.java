@@ -61,31 +61,11 @@ public class EntryTicketRestAdapter {
         return null; // LINEA PROVISIONAL
     }
 
-    @GetMapping("/{id}/barcode.png")
-    public ResponseEntity<EntryTicketResponse> barcodeEntryTicket(@PathVariable UUID id, @Valid @RequestBody EntryTicketRequest request) {
-        //EntryTicketDTO barEntryTicket = barcodeEntryTicketUseCase.execute(id, mapper.toCreateDTO(request));
-        //return new ResponseEntity<>(mapper.toResponse(barcodeEntryTicket));
-        return null; // LINEA PROVISIONAL
-    }
 
     @PostMapping
     public ResponseEntity<EntryTicketResponse> createEntryTicket(@Valid @RequestBody EntryTicketRequest request) {
         //EntryTicketDTO savedEntryTicket = createEntryTicketUseCase.execute(mapper.toCreateDTO(request));
         //return new ResponseEntity<>(mapper.toResponse(savedEntryTicket), HttpStatus.CREATED);
-        return null; // LINEA PROVISIONAL
-    }
-
-    @PatchMapping("/{id}/use")
-    public ResponseEntity<EntryTicketResponse> consumeEntryTicket(@PathVariable UUID id, @Valid @RequestBody EntryTicketRequest request) {
-        //EntryTicketDTO consumedEntryTicket = consumeEntryTicketUseCase.execute(id, mapper.toCreateDTO(request));
-        //return new ResponseEntity<>(mapper.toResponse(consumedEntryTicket));
-        return null; // LINEA PROVISIONAL
-    }
-
-    @PatchMapping("/{id}/lost")
-    public ResponseEntity<EntryTicketResponse> solicitateEntryTicket(@PathVariable UUID id, @Valid @RequestBody EntryTicketRequest request) {
-        //EntryTicketDTO solicitatedEntryTicket = solicitateEntryTicketUseCase.execute(id, mapper.toCreateDTO(request));
-        //return new ResponseEntity<>(mapper.toResponse(solicitatedEntryTicket));
         return null; // LINEA PROVISIONAL
     }
 
