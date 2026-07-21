@@ -16,8 +16,7 @@ public class EntryTicket {
 
     // --- CONSTRUCTORES ---
 
-    // Constructor sin parámetros (por defecto)
-    private EntryTicket() {}
+    
         
 
     // Constructor con todos los parámetros

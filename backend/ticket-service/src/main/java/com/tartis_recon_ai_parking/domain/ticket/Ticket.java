@@ -14,11 +14,9 @@ public class Ticket {
     private Instant issuedAt;
     private BigDecimal totalAmount;
     
-    public Ticket() {
-    }
 
     // Constructor completo
-    public Ticket(UUID uniqueId, UUID stayId, Instant issuedAt, BigDecimal totalAmount) {
+    private Ticket(UUID uniqueId, UUID stayId, Instant issuedAt, BigDecimal totalAmount) {
         this.uniqueId = uniqueId;
         this.stayId = stayId;
         this.issuedAt = issuedAt;
