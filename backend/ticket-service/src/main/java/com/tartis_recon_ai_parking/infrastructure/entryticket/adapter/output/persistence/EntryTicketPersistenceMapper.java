@@ -7,24 +7,20 @@ import org.springframework.stereotype.Component;
 public class EntryTicketPersistenceMapper {
 
     public EntryTicketEntity toEntity(EntryTicket entryTicket) {
-        /*EntryTicketEntity entity = new EntryTicketEntity();
-        entity.setId(entryTicket.getId());
+        EntryTicketEntity entity = new EntryTicketEntity();
+        entity.setId(entryTicket.getUniqueId());
         entity.setStayId(entryTicket.getStayId());
         entity.setCode(entryTicket.getCode());
         entity.setIssuedAt(entryTicket.getIssuedAt());
-        entity.setUsedAt(entryTicket.getUsedAt());
-        return entity;*/
-        throw new UnsupportedOperationException("Pendiente de EntryTicket (dominio)");
+        return entity;
     }
 
     public EntryTicket toDomain(EntryTicketEntity entity) {
-        /*return EntryTicket.restore(
+        return EntryTicket.recreate(
                 entity.getId(),
                 entity.getStayId(),
-                entity.getCode(),
                 entity.getIssuedAt(),
-                entity.getUsedAt()
-        );*/
-        throw new UnsupportedOperationException("Pendiente de EntryTicket (dominio)");
+                entity.getCode()
+        );
     }
 }

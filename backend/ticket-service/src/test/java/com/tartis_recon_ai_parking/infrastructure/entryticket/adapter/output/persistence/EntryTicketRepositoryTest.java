@@ -70,4 +70,35 @@ class EntryTicketRepositoryTest {
         assertThatThrownBy(() -> repository.saveAndFlush(e2))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
+
+    @Test
+    void stayId_duplicado_lanza_excepcion() {
+    UUID stayId = UUID.randomUUID();
+
+    EntryTicketEntity e1 = new EntryTicketEntity();
+    e1.setId(UUID.randomUUID());
+    e1.setStayId(stayId);
+    e1.setCode("CODE-A");
+    e1.setIssuedAt(Instant.now());
+    repository.saveAndFlush(e1);
+
+    EntryTicketEntity e2 = new EntryTicketEntity();
+    e2.setId(UUID.randomUUID());
+    e2.setStayId(stayId); // misma estancia
+    e2.setCode("CODE-B");
+    e2.setIssuedAt(Instant.now());
+
+    assertThatThrownBy(() -> repository.saveAndFlush(e2))
+            .isInstanceOf(DataIntegrityViolationException.class);
+}
+
+@Test
+void no_encuentra_code_inexistente() {
+    assertThat(repository.findByCode("NO-EXISTE")).isEmpty();
+}
+
+@Test
+void no_encuentra_stayId_inexistente() {
+    assertThat(repository.findByStayId(UUID.randomUUID())).isEmpty();
+}
 }

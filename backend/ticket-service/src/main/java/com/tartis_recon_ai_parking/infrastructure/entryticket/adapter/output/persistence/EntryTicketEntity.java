@@ -26,8 +26,6 @@ public class EntryTicketEntity {
     @Column(nullable = false)
     private Instant issuedAt;
 
-    private Instant usedAt; // nullable: solo se rellena al usarse (IN-21)
-
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
@@ -40,6 +38,4 @@ public class EntryTicketEntity {
     public Instant getIssuedAt() { return issuedAt; }
     public void setIssuedAt(Instant issuedAt) { this.issuedAt = issuedAt; }
 
-    public Instant getUsedAt() { return usedAt; }
-    public void setUsedAt(Instant usedAt) { this.usedAt = usedAt; }
 }
