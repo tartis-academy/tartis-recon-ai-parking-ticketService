@@ -28,6 +28,17 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<!-- Ficheros sin logica (records, entidades JPA, config, interfaces de
+		     Spring Data): no aportan nada a la metrica de cobertura. -->
+		<sonar.coverage.exclusions>
+			**/dto/**,
+			**/*Entity.java,
+			**/*Request.java,
+			**/*Response.java,
+			**/*Repository.java,
+			**/config/**,
+			**/*Application.java
+		</sonar.coverage.exclusions>
 	</properties>
 	<dependencies>
 		<dependency>
