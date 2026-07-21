@@ -17,11 +17,8 @@ public class EntryTicket {
     // --- CONSTRUCTORES ---
 
     // Constructor sin parámetros (por defecto)
-    private EntryTicket() {
-        uniqueId = UUID.randomUUID();
-        stayId = UUID.randomUUID();
+    private EntryTicket() {}
         
-    }
 
     // Constructor con todos los parámetros
     private EntryTicket(UUID uniqueId, UUID stayId, Instant issuedAt, String code) {
@@ -41,9 +38,16 @@ public class EntryTicket {
    
     }
 
-    public EntryTicket update(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
+    public EntryTicket create(Instant issuedAt, String code){
+        UUID uniqueId = UUID.randomUUID();
+        UUID stayId = UUID.randomUUID();
         validateData(uniqueId, stayId, issuedAt, code);
-        return new EntryTicket(this.uniqueId, this.stayId, this.issuedAt, this.code);
+        return new EntryTicket(uniqueId, stayId, issuedAt, code);
+    }
+
+    public EntryTicket recreate(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
+         validateData(uniqueId, stayId, issuedAt, code);
+        return new EntryTicket(uniqueId, stayId , issuedAt, code);
     }
 
 
@@ -63,16 +67,9 @@ public class EntryTicket {
         return issuedAt;
     }
 
-    public void setIssuedAt(Instant issuedAt) {
-        this.issuedAt = issuedAt;
-    }
-
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
 
 }
