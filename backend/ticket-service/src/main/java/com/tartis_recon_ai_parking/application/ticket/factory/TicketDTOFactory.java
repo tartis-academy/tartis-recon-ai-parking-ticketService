@@ -21,9 +21,10 @@ public static TicketDTO toDTO(Ticket ticket) {
         return ticket.stream().map(TicketDTOFactory::toDTO).toList();
     }
 
+    //tendria q usar el create 
     public static Ticket toDomain(TicketCreateDTO dto) {
-        return new Ticket(
-                dto.stayId(),
+        return Ticket.create(
+                dto.issuedAt(),
                 dto.totalAmount());
     }
 }
