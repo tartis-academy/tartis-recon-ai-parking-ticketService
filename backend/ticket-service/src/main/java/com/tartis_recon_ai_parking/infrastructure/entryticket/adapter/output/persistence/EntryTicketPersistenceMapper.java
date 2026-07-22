@@ -1,6 +1,26 @@
 package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.output.persistence;
 
+import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
+import org.springframework.stereotype.Component;
+
+@Component
 public class EntryTicketPersistenceMapper {
-    // Pendiente de implementacion: toDomain() debe llamar a EntryTicket.restore(...) para revalidar invariantes
-    // Pendiente de implementacion: toEntity()
+
+    public EntryTicketEntity toEntity(EntryTicket entryTicket) {
+        EntryTicketEntity entity = new EntryTicketEntity();
+        entity.setId(entryTicket.getUniqueId());
+        entity.setStayId(entryTicket.getStayId());
+        entity.setCode(entryTicket.getCode());
+        entity.setIssuedAt(entryTicket.getIssuedAt());
+        return entity;
+    }
+
+    public EntryTicket toDomain(EntryTicketEntity entity) {
+        return EntryTicket.recreate(
+                entity.getId(),
+                entity.getStayId(),
+                entity.getIssuedAt(),
+                entity.getCode()
+        );
+    }
 }
