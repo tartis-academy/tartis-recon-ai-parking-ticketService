@@ -1,6 +1,8 @@
 package com.tartis_recon_ai_parking.application.entryticket.factory;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
@@ -24,6 +26,8 @@ public final class EntryTicketDTOFactory {
     }
 
     public static EntryTicket toDomain(EntryTicketCreateDTO dto) {
-        return new EntryTicket(dto.stayId());
+        Instant issuedAt = Instant.now();
+        String code = UUID.randomUUID().toString();
+        return EntryTicket.create(dto.stayId(), issuedAt, code);
     }
 }
