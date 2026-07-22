@@ -24,6 +24,7 @@ public static TicketDTO toDTO(Ticket ticket) {
     //tendria q usar el create 
     public static Ticket toDomain(TicketCreateDTO dto) {
         return Ticket.create(
+                dto.stayId(),
                 dto.issuedAt(),
                 dto.totalAmount());
     }
