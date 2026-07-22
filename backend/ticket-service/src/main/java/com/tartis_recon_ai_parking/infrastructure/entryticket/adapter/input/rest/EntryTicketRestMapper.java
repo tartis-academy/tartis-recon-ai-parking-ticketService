@@ -14,8 +14,8 @@ public interface EntryTicketRestMapper {
 
     EntryTicketCreateDTO toCreateDTO(EntryTicketRequest request);
 
-    EntryTicketResponse toResponse(EntryTicketDTO vehicle);
+    EntryTicketResponse toResponse(EntryTicketDTO entryTicket);
 
-    Iterable<EntryTicketResponse> toResponseList(Iterable<EntryTicketDTO> vehicles);
-    
+    Iterable<EntryTicketResponse> toResponseList(Iterable<EntryTicketDTO> entryTicket);
+
 }
