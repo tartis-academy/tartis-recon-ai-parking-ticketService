@@ -9,6 +9,10 @@ public final class EntryTicketDTOFactory {
     private EntryTicketDTOFactory() {}
     
     public static EntryTicketDTO toDTO(EntryTicket entry){
-        return new EntryTicketDTO(entry.getUniqueId(), entry.getStayId(), entry.getCode(), entry.getIssuedAt(), entry.getSt)
+        return new EntryTicketDTO(entry.getUniqueId(), entry.getStayId(), entry.getCode(), entry.getIssuedAt());
+    }
+
+    public static EntryTicket toDomain(EntryTicketCreateDTO dto){
+        return EntryTicket.create(dto.stayId(), dto.issuedAt(), dto.code(), dto.status());       
     }
 }

@@ -4,7 +4,6 @@ import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreate
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.factory.EntryTicketDTOFactory;
 import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTicketPersistence;
-import com.tartis_recon_ai_parking.application.ticket.dto.TicketDTO;
 import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.InvalidEntryTicketException;
 

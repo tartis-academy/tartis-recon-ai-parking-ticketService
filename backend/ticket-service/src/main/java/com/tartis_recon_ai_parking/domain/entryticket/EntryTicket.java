@@ -13,40 +13,36 @@ public class EntryTicket {
     private UUID stayId;
     private Instant issuedAt;
     private String code;
-    private EntryTicketStatus status;
 
     // --- CONSTRUCTORES ---
 
 
     // Constructor con todos los parámetros
-    private EntryTicket(UUID uniqueId, UUID stayId, Instant issuedAt, String code, EntryTicketStatus status) {
+    private EntryTicket(UUID uniqueId, UUID stayId, Instant issuedAt, String code) {
 
         this.uniqueId = uniqueId;
         this.stayId = stayId;
         this.issuedAt = issuedAt;
         this.code = code;
-        this.status = status;
     }
 
-    static private void validateData(UUID uniqueId, UUID stayId, Instant issuedAt, String code, EntryTicketStatus status){
+    static private void validateData(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
 
         if(uniqueId == null) throw new InvalidEntryTicketException("uniqueId is null");
         if(stayId == null) throw new InvalidEntryTicketException("stayId is null");
         if(issuedAt == null) throw new InvalidEntryTicketException("issuedAt is null");
         if(code == null) throw new InvalidEntryTicketException("code is null");
-        if(status == null) throw new InvalidEntryTicketException("status is null");
-   
     }
 
-    static public EntryTicket create(UUID stayId,Instant issuedAt, String code, EntryTicketStatus status){
+    static public EntryTicket create(UUID stayId,Instant issuedAt, String code){
         UUID uniqueId = UUID.randomUUID();
-        validateData(uniqueId, stayId, issuedAt, code, status);
-        return new EntryTicket(uniqueId, stayId, issuedAt, code, status);
+        validateData(uniqueId, stayId, issuedAt, code);
+        return new EntryTicket(uniqueId, stayId, issuedAt, code);
     }
 
-    static public EntryTicket recreate(UUID uniqueId, UUID stayId, Instant issuedAt, String code, EntryTicketStatus status){
-        validateData(uniqueId, stayId, issuedAt, code, status);
-        return new EntryTicket(uniqueId, stayId , issuedAt, code, status);
+    static public EntryTicket recreate(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
+        validateData(uniqueId, stayId, issuedAt, code);
+        return new EntryTicket(uniqueId, stayId , issuedAt, code);
     }
 
 
@@ -70,8 +66,5 @@ public class EntryTicket {
         return code;
     }
     
-    public EntryTicketStatus getStatus(){
-        return status;
-    }
 
 }
