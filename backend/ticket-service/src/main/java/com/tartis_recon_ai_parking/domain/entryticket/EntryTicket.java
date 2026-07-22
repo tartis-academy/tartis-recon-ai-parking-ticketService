@@ -28,7 +28,7 @@ public class EntryTicket {
 
     }
 
-    private void validateData(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
+    static private void validateData(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
 
         if(uniqueId == null) throw new InvalidEntryTicketException("uniqueId is null");
         if(stayId == null) throw new InvalidEntryTicketException("stayId is null");
@@ -37,14 +37,13 @@ public class EntryTicket {
    
     }
 
-    public EntryTicket create(Instant issuedAt, String code){
+    static public EntryTicket create(UUID stayId,Instant issuedAt, String code){
         UUID uniqueId = UUID.randomUUID();
-        UUID stayId = UUID.randomUUID();
         validateData(uniqueId, stayId, issuedAt, code);
         return new EntryTicket(uniqueId, stayId, issuedAt, code);
     }
 
-    public EntryTicket recreate(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
+    static public EntryTicket recreate(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
          validateData(uniqueId, stayId, issuedAt, code);
         return new EntryTicket(uniqueId, stayId , issuedAt, code);
     }

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
 
 public class Ticket {
@@ -23,7 +22,7 @@ public class Ticket {
         this.totalAmount = totalAmount;
     }
 
-    private void validateData(UUID uniqueId, UUID stayId, Instant issuedAt, BigDecimal totalAmount){
+    static private void validateData(UUID uniqueId, UUID stayId, Instant issuedAt, BigDecimal totalAmount){
 
         if(uniqueId == null) throw new InvalidTicketException("uniqueId is null");
         if(stayId == null) throw new InvalidTicketException("stayId is null");
@@ -32,14 +31,13 @@ public class Ticket {
    
     }
 
-    public static Ticket create(Instant issuedAt, BigDecimal totalAmount){
+    static public Ticket create(UUID stayId, Instant issuedAt, BigDecimal totalAmount){
         UUID uniqueId = UUID.randomUUID();
-        UUID stayId = UUID.randomUUID();
         validateData(uniqueId, stayId, issuedAt, totalAmount);
         return new Ticket(uniqueId, stayId, issuedAt, totalAmount);
     }
 
-    public static Ticket recreate(UUID uniqueId, UUID stayId, Instant issuedAt, BigDecimal totalAmount){
+    static public Ticket recreate(UUID uniqueId, UUID stayId, Instant issuedAt, BigDecimal totalAmount){
          validateData(uniqueId, stayId, issuedAt, totalAmount);
         return new Ticket(uniqueId, stayId , issuedAt, totalAmount);
     }
