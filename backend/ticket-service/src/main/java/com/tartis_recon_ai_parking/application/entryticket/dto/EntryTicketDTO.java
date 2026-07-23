@@ -8,4 +8,4 @@ public record EntryTicketDTO(
         UUID stayId,
         Instant issuedAt,
         String code) {
-        }
+}

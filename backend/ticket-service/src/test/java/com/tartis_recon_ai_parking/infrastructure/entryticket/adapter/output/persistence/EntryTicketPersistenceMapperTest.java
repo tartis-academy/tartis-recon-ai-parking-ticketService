@@ -14,8 +14,8 @@ class EntryTicketPersistenceMapperTest {
 
     @Test
     void toEntity_mapea_todos_los_campos() {
-        EntryTicket ticket = EntryTicket.create(UUID.randomUUID(), Instant.now(), "ABC123");
-        // ajusta la llamada a create(...) según la firma final que acuerdes con tu compañero
+        EntryTicket ticket = EntryTicket.recreate(UUID.randomUUID(), UUID.randomUUID(), Instant.now(), "ABC123");
+        // usamos recreate para tener control sobre los valores en el test
 
         EntryTicketEntity entity = mapper.toEntity(ticket);
 
