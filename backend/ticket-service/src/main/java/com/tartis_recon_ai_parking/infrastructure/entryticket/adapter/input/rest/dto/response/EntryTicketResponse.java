@@ -3,4 +3,4 @@ package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.res
 import java.time.Instant;
 import java.util.UUID;
 
-public record EntryTicketResponse(UUID id, UUID stayId, String code, Instant issuedAt, String status) {}
+public record EntryTicketResponse(UUID id, UUID stayId, Instant issuedAt, String code) {}

@@ -6,8 +6,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.tartis_recon_ai_parking.domain.ticket.Ticket;
-
 // Representa la tabla "receipts" en el sistema de base de datos relacional.
 @Entity
 @Table(name = "receipts")
