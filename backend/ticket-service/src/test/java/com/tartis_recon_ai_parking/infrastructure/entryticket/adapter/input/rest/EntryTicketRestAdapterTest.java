@@ -47,8 +47,8 @@ class EntryTicketRestAdapterTest {
 
         EntryTicketRequest request = new EntryTicketRequest(stayId);
         EntryTicketCreateDTO createDTO = new EntryTicketCreateDTO(stayId);
-        EntryTicketDTO savedDTO = new EntryTicketDTO(ticketId, stayId, code, now);
-        EntryTicketResponse response = new EntryTicketResponse(ticketId, stayId, code, now);
+        EntryTicketDTO savedDTO = new EntryTicketDTO(ticketId, stayId, now, code);
+        EntryTicketResponse response = new EntryTicketResponse(ticketId, stayId, now, code);
 
         when(mapper.toCreateDTO(request)).thenReturn(createDTO);
         when(createUseCase.execute(createDTO)).thenReturn(savedDTO);

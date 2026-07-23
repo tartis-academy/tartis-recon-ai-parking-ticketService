@@ -2,6 +2,8 @@ package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest;
 
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto.request.TicketRequest;
 
 @RestController
 @RequestMapping("/v1/tickets")
@@ -24,7 +28,7 @@ public class TicketRestAdapter {
      * POST /v1/tickets
      */
     @PostMapping
-    public ResponseEntity<Void> createTicket(@RequestBody Object request) {
+    public ResponseEntity<Void> createTicket(@Valid @RequestBody TicketRequest request) {
         // TODO: implementar creacion de ticket
         return null;
     }
