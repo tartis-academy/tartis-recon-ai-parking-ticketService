@@ -3,7 +3,21 @@ package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public record TicketResponse(UUID uniqueId, UUID stayId, Instant issuedAt, BigDecimal totalAmount) {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class TicketResponse {
+
+    private UUID uniqueId;
+    private UUID stayId;
+    private Instant issuedAt;
+    private BigDecimal totalAmount;
 }
-
