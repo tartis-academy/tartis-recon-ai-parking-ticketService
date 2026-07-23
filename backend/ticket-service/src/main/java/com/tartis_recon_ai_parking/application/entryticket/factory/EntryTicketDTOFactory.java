@@ -1,33 +1,18 @@
 package com.tartis_recon_ai_parking.application.entryticket.factory;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 
 public final class EntryTicketDTOFactory {
-
-    private EntryTicketDTOFactory() {
+    
+    private EntryTicketDTOFactory() {}
+    
+    public static EntryTicketDTO toDTO(EntryTicket entry){
+        return new EntryTicketDTO(entry.getUniqueId(), entry.getStayId(), entry.getCode(), entry.getIssuedAt());
     }
 
-    public static EntryTicketDTO toDTO(EntryTicket entryTicket) {
-        return new EntryTicketDTO(
-                entryTicket.getUniqueId(),
-                entryTicket.getStayId(),
-                entryTicket.getIssuedAt(),
-                entryTicket.getCode());
-    }
-
-    public static List<EntryTicketDTO> toDTOList(List<EntryTicket> entryTickets) {
-        return entryTickets.stream().map(EntryTicketDTOFactory::toDTO).toList();
-    }
-
-    public static EntryTicket toDomain(EntryTicketCreateDTO dto) {
-        Instant issuedAt = Instant.now();
-        String code = UUID.randomUUID().toString();
-        return EntryTicket.create(dto.stayId(), issuedAt, code);
+    public static EntryTicket toDomain(EntryTicketCreateDTO dto){
+        return EntryTicket.create(dto.stayId());       
     }
 }
