@@ -5,5 +5,5 @@ import java.util.UUID;
 import java.util.Optional;
 
 public interface TicketRepository extends JpaRepository<TicketEntity, UUID> {
-     Optional<TicketEntity> findById(UUID plate);
+     Optional<TicketEntity> findById(UUID id);
 }
