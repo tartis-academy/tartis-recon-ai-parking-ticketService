@@ -1,20 +1,18 @@
 package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest;
 
-import java.util.List;
 import java.util.UUID;
 
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
-import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.EntryTicketNotFoundException;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest.dto.request.EntryTicketRequest;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest.dto.response.EntryTicketResponse;
 
 import jakarta.validation.Valid;
 
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,9 +66,8 @@ public class EntryTicketRestAdapter {
 
     @PostMapping
     public ResponseEntity<EntryTicketResponse> createEntryTicket(@Valid @RequestBody EntryTicketRequest request) {
-        //EntryTicketDTO savedEntryTicket = createUseCase.execute(mapper.toCreateDTO(request));
-        //return new ResponseEntity<>(mapper.toResponse(savedEntryTicket), HttpStatus.CREATED);
-        return null; // MÉTODO POR IMPLEMENTAR
+        EntryTicketDTO savedEntryTicket = createUseCase.execute(mapper.toCreateDTO(request));
+        return new ResponseEntity<>(mapper.toResponse(savedEntryTicket), HttpStatus.CREATED);
     }
 
 
@@ -83,6 +80,3 @@ public class EntryTicketRestAdapter {
         return null; // MÉTODO POR IMPLEMENTAR
     }
 }
-
-    
-    

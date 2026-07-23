@@ -4,7 +4,6 @@ import com.tartis_recon_ai_parking.application.ticket.port.output.TicketPersiste
 import com.tartis_recon_ai_parking.domain.ticket.Ticket;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
-import java.util.List;
 import java.util.UUID;
 
 @Component

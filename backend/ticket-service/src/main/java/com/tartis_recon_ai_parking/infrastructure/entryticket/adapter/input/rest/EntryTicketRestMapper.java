@@ -18,7 +18,6 @@ public interface EntryTicketRestMapper {
 
     // AQUÍ es donde realmente hacían falta las anotaciones
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", ignore = true)
     EntryTicketResponse toResponse(EntryTicketDTO entryTicket);
 
     Iterable<EntryTicketResponse> toResponseList(Iterable<EntryTicketDTO> entryTicket);
