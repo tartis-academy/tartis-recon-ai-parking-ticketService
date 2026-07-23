@@ -13,6 +13,6 @@ public final class EntryTicketDTOFactory {
     }
 
     public static EntryTicket toDomain(EntryTicketCreateDTO dto){
-        return EntryTicket.create(dto.stayId(), dto.issuedAt(), dto.code(), dto.status());       
+        return EntryTicket.create(dto.stayId());       
     }
 }

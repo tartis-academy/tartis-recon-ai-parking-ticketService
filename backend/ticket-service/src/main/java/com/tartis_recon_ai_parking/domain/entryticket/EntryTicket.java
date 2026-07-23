@@ -3,6 +3,7 @@ package com.tartis_recon_ai_parking.domain.entryticket;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.tartis_recon_ai_parking.application.entryticket.generator.EntryTicketCodeGenerator;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.InvalidEntryTicketException;
 
 
@@ -20,6 +21,8 @@ public class EntryTicket {
     // Constructor con todos los parámetros
     private EntryTicket(UUID uniqueId, UUID stayId, Instant issuedAt, String code) {
 
+        validateData(uniqueId, stayId, issuedAt, code);
+
         this.uniqueId = uniqueId;
         this.stayId = stayId;
         this.issuedAt = issuedAt;
@@ -34,14 +37,13 @@ public class EntryTicket {
         if(code == null) throw new InvalidEntryTicketException("code is null");
     }
 
-    static public EntryTicket create(UUID stayId,Instant issuedAt, String code){
+    static public EntryTicket create(UUID stayId){
         UUID uniqueId = UUID.randomUUID();
-        validateData(uniqueId, stayId, issuedAt, code);
-        return new EntryTicket(uniqueId, stayId, issuedAt, code);
+        return new EntryTicket(uniqueId, stayId, Instant.now(), EntryTicketCodeGenerator.generate());
     }
 
     static public EntryTicket recreate(UUID uniqueId, UUID stayId, Instant issuedAt, String code){
-        validateData(uniqueId, stayId, issuedAt, code);
+        
         return new EntryTicket(uniqueId, stayId , issuedAt, code);
     }
 
