@@ -31,4 +31,6 @@ public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersist
         return ticketRepository.findById(id)
                 .map(entity -> ticketPersistenceMapper.toDomain(entity));
     }
+
+    
 }
