@@ -28,7 +28,7 @@ class EntryTicketPersistenceAdapterTest {
 
     @Test
     void guarda_y_recupera_por_id_a_traves_del_puerto() {
-        EntryTicket ticket = EntryTicket.create(UUID.randomUUID(), Instant.now(), "ADAPTER-1");
+        EntryTicket ticket = EntryTicket.recreate(UUID.randomUUID(), UUID.randomUUID(), Instant.now(), "ADAPTER-1");
 
         EntryTicket saved = adapter.save(ticket);
 
@@ -39,7 +39,7 @@ class EntryTicketPersistenceAdapterTest {
 
     @Test
     void encuentra_por_code_a_traves_del_puerto() {
-        EntryTicket ticket = EntryTicket.create(UUID.randomUUID(), Instant.now(), "ADAPTER-2");
+        EntryTicket ticket = EntryTicket.recreate(UUID.randomUUID(), UUID.randomUUID(), Instant.now(), "ADAPTER-2");
         adapter.save(ticket);
 
         Optional<EntryTicket> found = adapter.findByCode("ADAPTER-2");
@@ -50,7 +50,7 @@ class EntryTicketPersistenceAdapterTest {
     @Test
     void encuentra_por_stayId_a_traves_del_puerto() {
         UUID stayId = UUID.randomUUID();
-        EntryTicket ticket = EntryTicket.create(stayId, Instant.now(), "ADAPTER-3");
+        EntryTicket ticket = EntryTicket.recreate(UUID.randomUUID(), stayId, Instant.now(), "ADAPTER-3");
         adapter.save(ticket);
 
         Optional<EntryTicket> found = adapter.findByStayId(stayId);
