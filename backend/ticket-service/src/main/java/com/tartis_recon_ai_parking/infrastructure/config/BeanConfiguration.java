@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTicketPersistence;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
+import com.tartis_recon_ai_parking.application.ticket.port.output.TicketPersistence;
+import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
 
 @Configuration
 public class BeanConfiguration {
@@ -14,4 +16,10 @@ public class BeanConfiguration {
         return new CreateEntryTicketUseCase(entryTicketPersistence);
     }
 
+    @Bean
+    CreateTicketUseCase createTicketUseCase(TicketPersistence ticketPersistence){
+        return new CreateTicketUseCase(ticketPersistence);
+    }
+
 }
+
