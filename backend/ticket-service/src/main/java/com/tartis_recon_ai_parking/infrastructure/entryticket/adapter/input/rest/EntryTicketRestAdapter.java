@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
+import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.EntryTicketNotFoundException;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest.dto.request.EntryTicketRequest;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest.dto.response.EntryTicketResponse;
@@ -26,11 +27,13 @@ public class EntryTicketRestAdapter {
 
     //ATRIBUTOS CORRESPONDIENTES A LOS CASOS DE USO DEL TICKET DE ENTRADA
     private final CreateEntryTicketUseCase createUseCase;
+    private final GetEntryTicketUseCase getUseCase;
     private final EntryTicketRestMapper mapper;
 
-    public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase) {
+    public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase, GetEntryTicketUseCase getEntryTicketUseCase) {
         // Inicializar los casos de uso del ticket de entrada
         this.createUseCase = createEntryTicketUseCase;
+        this.getUseCase = getEntryTicketUseCase;
         this.mapper = mapper;
     }
 
@@ -49,9 +52,8 @@ public class EntryTicketRestAdapter {
 
     @GetMapping("/{id}/code")
     public ResponseEntity<EntryTicketResponse> getEntryTicketById(@PathVariable UUID id) throws EntryTicketNotFoundException {
-        //EntryTicketDTO entryTickets; = ... ejecutar caso de uso getEntryTickets
-        //return ResponseEntity.ok(mapper.toResponseList(entryTickets));
-        return null; // MÉTODO POR IMPLEMENTAR
+        EntryTicketDTO entryTicket = getUseCase.execute(id);
+        return ResponseEntity.ok(mapper.toResponse(entryTicket));
     }
 
 
