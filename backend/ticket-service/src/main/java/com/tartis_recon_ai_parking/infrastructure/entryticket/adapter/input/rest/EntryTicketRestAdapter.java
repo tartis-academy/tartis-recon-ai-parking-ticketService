@@ -2,7 +2,6 @@ package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.res
 
 import java.util.UUID;
 
-import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
@@ -26,19 +25,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/entry-tickets")
 public class EntryTicketRestAdapter {
 
-    private final EntryTicketCreateDTO entryTicketCreateDTO;
     //ATRIBUTOS CORRESPONDIENTES A LOS CASOS DE USO DEL TICKET DE ENTRADA
     private final CreateEntryTicketUseCase createUseCase;
     private final GetEntryTicketUseCase getUseCase;
     private final EntryTicketRestMapper mapper;
 
     public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase,
-            GetEntryTicketUseCase getEntryTicketUseCase, EntryTicketCreateDTO entryTicketCreateDTO) {
+            GetEntryTicketUseCase getEntryTicketUseCase) {
         // Inicializar los casos de uso del ticket de entrada
         this.createUseCase = createEntryTicketUseCase;
         this.getUseCase = getEntryTicketUseCase;
         this.mapper = mapper;
-        this.entryTicketCreateDTO = entryTicketCreateDTO;
     }
 
     //#####################################################################################################

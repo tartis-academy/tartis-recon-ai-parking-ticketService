@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
@@ -50,10 +49,6 @@ class EntryTicketRestAdapterMvcTest {
     // Necesario aunque no se use en estos tests: el constructor del adapter lo exige.
     @MockitoBean
     private CreateEntryTicketUseCase createUseCase;
-
-    // Idem: EntryTicketCreateDTO no tiene @Bean real, el constructor del adapter lo exige igualmente.
-    @MockitoBean
-    private EntryTicketCreateDTO entryTicketCreateDTO;
 
     @Test
     @DisplayName("GET /{id}/code devuelve 200 y el ticket completo cuando el id existe")
