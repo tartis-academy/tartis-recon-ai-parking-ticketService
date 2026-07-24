@@ -4,6 +4,7 @@ import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTick
 import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,5 +40,13 @@ public class EntryTicketPersistenceAdapter implements EntryTicketPersistence {
     @Override
     public Optional<EntryTicket> findByStayId(UUID stayId) {
         return repository.findByStayId(stayId).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<EntryTicket> findAll() {
+        // TODO Auto-generated method stub
+        return repository.findAll().stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }
