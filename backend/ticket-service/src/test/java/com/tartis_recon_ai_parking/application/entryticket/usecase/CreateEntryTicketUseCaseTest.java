@@ -1,6 +1,5 @@
 package com.tartis_recon_ai_parking.application.entryticket.usecase;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +62,7 @@ class CreateEntryTicketUseCaseTest {
         assertThat(result).isNotNull();
         assertThat(result.stayId()).isEqualTo(stayId);
         assertThat(result.code()).isEqualTo(capturedTicket.getCode());
-        assertThat(result.id()).isEqualTo(capturedTicket.getUniqueId());
+        assertThat(result.uniqueId()).isEqualTo(capturedTicket.getUniqueId());
     }
 
     @Test

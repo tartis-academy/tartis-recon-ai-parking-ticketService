@@ -73,6 +73,3 @@ public class EntryTicketRestAdapter {
         return null; // MÉTODO POR IMPLEMENTAR
     }
 }
-
-    
-    
