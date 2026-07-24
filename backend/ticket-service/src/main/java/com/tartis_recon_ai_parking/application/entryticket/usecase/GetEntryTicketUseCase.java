@@ -1,5 +1,6 @@
 package com.tartis_recon_ai_parking.application.entryticket.usecase;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
@@ -13,6 +14,10 @@ public class GetEntryTicketUseCase {
 
     public GetEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence) {
         this.entryTicketPersistence = entryTicketPersistence;
+    }
+
+    public List<EntryTicketDTO> getAll() {
+        return EntryTicketDTOFactory.toDTOList(entryTicketPersistence.findAll());
     }
 
     public EntryTicketDTO execute(UUID id) {

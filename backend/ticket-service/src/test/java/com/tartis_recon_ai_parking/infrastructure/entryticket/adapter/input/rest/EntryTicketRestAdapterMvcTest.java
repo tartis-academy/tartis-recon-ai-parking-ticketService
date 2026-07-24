@@ -58,7 +58,7 @@ class EntryTicketRestAdapterMvcTest {
         String code = "ABC23456DE";
 
         when(getUseCase.execute(id))
-                .thenReturn(new EntryTicketDTO(id, stayId, code, Instant.now()));
+                .thenReturn(new EntryTicketDTO(id, stayId, Instant.now(), code));
 
         mockMvc.perform(get(URL, id))
                 .andExpect(status().isOk())

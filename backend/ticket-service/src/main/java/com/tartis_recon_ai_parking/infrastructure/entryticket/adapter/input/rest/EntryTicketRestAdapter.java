@@ -30,7 +30,8 @@ public class EntryTicketRestAdapter {
     private final GetEntryTicketUseCase getUseCase;
     private final EntryTicketRestMapper mapper;
 
-    public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase, GetEntryTicketUseCase getEntryTicketUseCase) {
+    public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase,
+            GetEntryTicketUseCase getEntryTicketUseCase) {
         // Inicializar los casos de uso del ticket de entrada
         this.createUseCase = createEntryTicketUseCase;
         this.getUseCase = getEntryTicketUseCase;
@@ -45,9 +46,8 @@ public class EntryTicketRestAdapter {
 
     @GetMapping
     public ResponseEntity<Iterable<EntryTicketResponse>> getAllEntryTickets() {
-        //Iterable<EntryTicketDTO> entryTickets; = ... ejecutar caso de uso getEntryTickets
-        //return ResponseEntity.ok(mapper.toResponseList(entryTickets));
-        return null; // MÉTODO POR IMPLEMENTAR
+        Iterable<EntryTicketDTO> entryTikets = getUseCase.getAll();
+        return ResponseEntity.ok(mapper.toResponseList(entryTikets));
     }
 
     @GetMapping("/{id}/code")

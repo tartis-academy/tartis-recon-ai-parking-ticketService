@@ -52,7 +52,7 @@ class GetEntryTicketUseCaseTest {
 
         // ASSERT: el DTO conserva los cuatro campos del dominio
         assertThat(result).isNotNull();
-        assertThat(result.id()).isEqualTo(id);
+        assertThat(result.uniqueId()).isEqualTo(id);
         assertThat(result.stayId()).isEqualTo(stayId);
         assertThat(result.code()).isEqualTo(code);
         assertThat(result.issuedAt()).isEqualTo(issuedAt);
