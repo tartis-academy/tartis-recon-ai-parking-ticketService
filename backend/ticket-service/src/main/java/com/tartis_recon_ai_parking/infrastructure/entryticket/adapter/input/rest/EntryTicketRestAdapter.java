@@ -29,13 +29,14 @@ public class EntryTicketRestAdapter {
     private final EntryTicketCreateDTO entryTicketCreateDTO;
     //ATRIBUTOS CORRESPONDIENTES A LOS CASOS DE USO DEL TICKET DE ENTRADA
     private final CreateEntryTicketUseCase createUseCase;
-    private final GetEntryTicketUseCase getEntryTicket;
+    private final GetEntryTicketUseCase getUseCase;
     private final EntryTicketRestMapper mapper;
 
-    public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase, EntryTicketCreateDTO entryTicketCreateDTO) {
+    public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase,
+            GetEntryTicketUseCase getEntryTicketUseCase, EntryTicketCreateDTO entryTicketCreateDTO) {
         // Inicializar los casos de uso del ticket de entrada
         this.createUseCase = createEntryTicketUseCase;
-        this.getEntryTicket = null;
+        this.getUseCase = getEntryTicketUseCase;
         this.mapper = mapper;
         this.entryTicketCreateDTO = entryTicketCreateDTO;
     }
@@ -48,19 +49,14 @@ public class EntryTicketRestAdapter {
 
     @GetMapping
     public ResponseEntity<Iterable<EntryTicketResponse>> getAllEntryTickets() {
-        Iterable<EntryTicketDTO> entryTikets = getEntryTicket.getAll();
+        Iterable<EntryTicketDTO> entryTikets = getUseCase.getAll();
         return ResponseEntity.ok(mapper.toResponseList(entryTikets));
-        //List<EntryTicketDTO> listaETDTO = getEntryTicket.getAll();
-        //Iterable<EntryTicketDTO> entryTickets; = ... ejecutar caso de uso getEntryTickets
-        //return ResponseEntity.ok(mapper.toResponseList(entryTickets));
-        
     }
 
     @GetMapping("/{id}/code")
     public ResponseEntity<EntryTicketResponse> getEntryTicketById(@PathVariable UUID id) throws EntryTicketNotFoundException {
-        //EntryTicketDTO entryTickets; = ... ejecutar caso de uso getEntryTickets
-        //return ResponseEntity.ok(mapper.toResponseList(entryTickets));
-        return null; // MÉTODO POR IMPLEMENTAR
+        EntryTicketDTO entryTicket = getUseCase.execute(id);
+        return ResponseEntity.ok(mapper.toResponse(entryTicket));
     }
 
 
