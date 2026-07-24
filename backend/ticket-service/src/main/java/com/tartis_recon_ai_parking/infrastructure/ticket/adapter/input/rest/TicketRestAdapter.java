@@ -1,7 +1,6 @@
 package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest;
 
 import java.util.UUID;
-
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketDTO;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
+import com.tartis_recon_ai_parking.application.ticket.usecase.GetTicketUseCase;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto.request.TicketRequest;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto.response.TicketResponse;
 
@@ -26,10 +26,12 @@ public class TicketRestAdapter {
 
     private final CreateTicketUseCase createUseCase;
     private final TicketRestMapper mapper;
+    private final GetTicketUseCase getTicketUseCase;
 
-    public TicketRestAdapter(TicketRestMapper mapper, CreateTicketUseCase createUseCase) {
+    public TicketRestAdapter(TicketRestMapper mapper, CreateTicketUseCase createUseCase, GetTicketUseCase getTicketUseCase) {
         this.createUseCase = createUseCase;
         this.mapper = mapper;
+        this.getTicketUseCase=getTicketUseCase;
     }
 
     /**
@@ -52,14 +54,13 @@ public class TicketRestAdapter {
         return null;
     }
 
-    /**
-     * Recupera un ticket por su ID.
-     * GET /v1/tickets/{ticketId}
-     */
-    @GetMapping("/{ticketId}")
-    public ResponseEntity<Void> getTicketById(@PathVariable UUID ticketId) {
-        // TODO: implementar consulta de ticket por id
-        return null;
+     @GetMapping("/{id}")
+    public ResponseEntity<TicketResponse> getById(@PathVariable UUID id) {
+        TicketDTO ticket = getTicketUseCase.getById(id);
+         if (ticket == null) {
+        return ResponseEntity.notFound().build();
+    }
+        return ResponseEntity.ok(mapper.toResponse(ticket));
     }
 
     /**

@@ -5,9 +5,10 @@ import java.util.List;
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketCreateDTO;
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketDTO;
 import com.tartis_recon_ai_parking.domain.ticket.Ticket;
+
 public final class TicketDTOFactory {
 
-    private TicketDTOFactory(){}
+private TicketDTOFactory(){}
 
 public static TicketDTO toDTO(Ticket ticket) {
         return new TicketDTO(

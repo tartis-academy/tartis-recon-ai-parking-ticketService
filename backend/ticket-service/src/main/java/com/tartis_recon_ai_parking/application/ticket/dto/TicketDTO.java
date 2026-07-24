@@ -6,18 +6,15 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class TicketDTO {
 
-    private UUID uniqueId;
-    private UUID stayId;
-    private Instant issuedAt;
-    private BigDecimal totalAmount;
+    private final UUID id;
+    private final UUID stayId;
+    private final Instant issuedAt;
+    private final BigDecimal totalAmount;
 }
