@@ -2,8 +2,10 @@ package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.res
 
 import java.util.UUID;
 
+import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
+import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.EntryTicketNotFoundException;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest.dto.request.EntryTicketRequest;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest.dto.response.EntryTicketResponse;
@@ -24,14 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/entry-tickets")
 public class EntryTicketRestAdapter {
 
+    private final EntryTicketCreateDTO entryTicketCreateDTO;
     //ATRIBUTOS CORRESPONDIENTES A LOS CASOS DE USO DEL TICKET DE ENTRADA
     private final CreateEntryTicketUseCase createUseCase;
+    private final GetEntryTicketUseCase getEntryTicket;
     private final EntryTicketRestMapper mapper;
 
-    public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase) {
+    public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase, EntryTicketCreateDTO entryTicketCreateDTO) {
         // Inicializar los casos de uso del ticket de entrada
         this.createUseCase = createEntryTicketUseCase;
+        this.getEntryTicket = null;
         this.mapper = mapper;
+        this.entryTicketCreateDTO = entryTicketCreateDTO;
     }
 
     //#####################################################################################################
@@ -42,9 +48,12 @@ public class EntryTicketRestAdapter {
 
     @GetMapping
     public ResponseEntity<Iterable<EntryTicketResponse>> getAllEntryTickets() {
+        Iterable<EntryTicketDTO> entryTikets = getEntryTicket.getAll();
+        return ResponseEntity.ok(mapper.toResponseList(entryTikets));
+        //List<EntryTicketDTO> listaETDTO = getEntryTicket.getAll();
         //Iterable<EntryTicketDTO> entryTickets; = ... ejecutar caso de uso getEntryTickets
         //return ResponseEntity.ok(mapper.toResponseList(entryTickets));
-        return null; // MÉTODO POR IMPLEMENTAR
+        
     }
 
     @GetMapping("/{id}/code")
