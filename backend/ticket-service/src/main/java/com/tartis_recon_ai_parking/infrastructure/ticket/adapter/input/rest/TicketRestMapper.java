@@ -1,23 +1,20 @@
 package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-
+import java.util.List;
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+import com.tartis_recon_ai_parking.application.ticket.dto.TicketCreateDTO;
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketDTO;
+import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto.request.TicketRequest;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto.response.TicketResponse;
 
-@Component
-public class TicketRestMapper {
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface TicketRestMapper {
 
-    public TicketResponse toResponse(TicketDTO ticket) {
-        if (ticket == null) {
-            return null;
-           
-        }
+    TicketCreateDTO toCreateDTO(TicketRequest request);
 
-        return new TicketResponse(ticket.getId(), ticket.getStayId(),ticket.getissuedAt(),ticket.getTotalAmount()
-           
-        );
-    }
+    TicketResponse toResponse(TicketDTO ticket);
 
+    List<TicketResponse> toResponseList(Iterable<TicketDTO> tickets);
 }
+
