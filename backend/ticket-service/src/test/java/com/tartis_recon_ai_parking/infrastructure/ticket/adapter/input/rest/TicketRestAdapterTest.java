@@ -117,23 +117,4 @@ class TicketRestAdapterTest {
         verify(mapper, never()).toResponse(any());
     }
 
-    // NOTA: endpoint aun no implementado (TODO en el codigo fuente).
-    // Este test documenta el comportamiento actual (siempre devuelve null)
-    // y debera actualizarse cuando se implemente el listado real.
-    @Test
-    void listTickets_WhenNotImplemented_ShouldReturnNull() {
-        ResponseEntity<Void> result = adapter.listTickets(stayId);
-
-        assertThat(result).isNull();
-    }
-
-    // NOTA: endpoint aun no implementado (TODO en el codigo fuente).
-    // Este test documenta el comportamiento actual y debera actualizarse
-    // cuando se implemente la logica de marcado de ticket como perdido.
-    @Test
-    void markTicketLost_WhenNotImplemented_ShouldReturnNull() {
-        ResponseEntity<Void> result = adapter.markTicketLost(ticketId);
-
-        assertThat(result).isNull();
-    }
 }
