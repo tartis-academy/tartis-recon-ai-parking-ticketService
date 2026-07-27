@@ -12,7 +12,7 @@ public class TicketPersistenceAdapter implements TicketPersistence{
 private final TicketRepository ticketRepository;
 private final TicketPersistenceMapper ticketPersistenceMapper;
 
-public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersistenceMapper ticketPersistenceMapper){
+public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersistenceMapper  ticketPersistenceMapper){
     this.ticketRepository=ticketRepository;
     this.ticketPersistenceMapper=ticketPersistenceMapper;
 

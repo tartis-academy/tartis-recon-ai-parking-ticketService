@@ -17,7 +17,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @EntityScan(basePackageClasses = EntryTicketEntity.class)
 @EnableJpaRepositories(basePackageClasses = EntryTicketRepository.class)
 @Import({EntryTicketPersistenceMapper.class, EntryTicketPersistenceAdapter.class})
