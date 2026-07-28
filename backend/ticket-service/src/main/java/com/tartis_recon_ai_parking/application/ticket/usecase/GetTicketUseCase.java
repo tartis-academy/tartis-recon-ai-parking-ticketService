@@ -17,4 +17,5 @@ public class GetTicketUseCase {
     public TicketDTO getById (UUID id){
         return persistence.findById(id).map(TicketDTOFactory::toDTO).orElseThrow(() -> new TicketNotFoundException("No existe un ticket con id " + id));
     }
+    
 }
