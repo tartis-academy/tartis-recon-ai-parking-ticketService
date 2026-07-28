@@ -85,15 +85,14 @@ class TicketRestAdapterMvcTest {
     }
 
     @Test
-    @DisplayName("GET /v1/tickets/{id} debería propagar TicketNotFoundException cuando no existe")
-    void getById_shouldThrowWhenNotFound() {
+    @DisplayName("GET /v1/tickets/{id} debería devolver 404 cuando no existe")
+    void getById_shouldReturn404WhenNotFound() throws Exception {
         UUID ticketId = UUID.randomUUID();
         when(getTicketUseCase.getById(ticketId))
                 .thenThrow(new TicketNotFoundException("No existe un ticket con id " + ticketId));
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() ->
-                        mockMvc.perform(get("/v1/tickets/{id}", ticketId)))
-                .hasCauseInstanceOf(TicketNotFoundException.class);
+        mockMvc.perform(get("/v1/tickets/{id}", ticketId))
+                .andExpect(status().isNotFound());
     }
 
     @Test
