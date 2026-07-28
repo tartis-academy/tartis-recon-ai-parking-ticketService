@@ -107,6 +107,21 @@
     		<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
@@ -122,11 +137,12 @@
 			<version>1.5.5.Final</version>
 		</dependency>
 		<dependency>
-    <groupId>com.h2database</groupId>
-    <artifactId>h2</artifactId>
-    <scope>test</scope>
-</dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>
@@ -214,11 +230,6 @@
 						<goals>
 							<goal>check</goal>
 						</goals>
-						<!-- Umbral bajado de 0.90 a 0.30: la cobertura real en release es
-						     ~37% con los tests actuales. 0.90 era aspiracional y bloqueaba
-						     el build antes de que corriera el propio quality gate de
-						     SonarCloud. Subir este numero a medida que se agreguen tests,
-						     no bajarlo mas. -->
 						<configuration>
 							<rules>
 								<rule>
@@ -227,7 +238,7 @@
 										<limit>
 											<counter>LINE</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.30</minimum>
+											<minimum>0.90</minimum>
 										</limit>
 									</limits>
 								</rule>
