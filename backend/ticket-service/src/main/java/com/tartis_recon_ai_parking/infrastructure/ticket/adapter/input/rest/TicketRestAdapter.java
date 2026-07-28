@@ -58,6 +58,9 @@ public class TicketRestAdapter {
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponse> getById(@PathVariable UUID id) {
         TicketDTO ticket = getTicketUseCase.getById(id);
+        if (ticket == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(mapper.toResponse(ticket));
     }
 
