@@ -1,5 +1,6 @@
 package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest;
 
+import java.util.List;
 import java.util.UUID;
 import jakarta.validation.Valid;
 
@@ -31,7 +32,7 @@ public class TicketRestAdapter {
     public TicketRestAdapter(TicketRestMapper mapper, CreateTicketUseCase createUseCase, GetTicketUseCase getTicketUseCase) {
         this.createUseCase = createUseCase;
         this.mapper = mapper;
-        this.getTicketUseCase=getTicketUseCase;
+        this.getTicketUseCase = getTicketUseCase;
     }
 
     /**
@@ -49,26 +50,15 @@ public class TicketRestAdapter {
      * GET /v1/tickets
      */
     @GetMapping
-    public ResponseEntity<Void> listTickets(@RequestParam(required = false) UUID stayId) {
-        // TODO: implementar listado de tickets
-        return null;
+    public ResponseEntity<List<TicketResponse>> listTickets(@RequestParam(required = false) UUID stayId) {
+        List<TicketDTO> tickets = getTicketUseCase.getAll();
+        return ResponseEntity.ok(mapper.toResponseList(tickets));
     }
 
-     @GetMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<TicketResponse> getById(@PathVariable UUID id) {
         TicketDTO ticket = getTicketUseCase.getById(id);
         return ResponseEntity.ok(mapper.toResponse(ticket));
     }
 
-    /**
-     * Marca un ticket como PERDIDO (IN-22): aplica tarifa de penalizacion
-     * en vez de la tarifa normal.
-     * PATCH /v1/tickets/{ticketId}/lost
-     */
-    @PatchMapping("/{ticketId}/lost")
-    public ResponseEntity<Void> markTicketLost(@PathVariable UUID ticketId) {
-        // TODO: implementar marcado de ticket como perdido
-        return null;
-    }
 }
-

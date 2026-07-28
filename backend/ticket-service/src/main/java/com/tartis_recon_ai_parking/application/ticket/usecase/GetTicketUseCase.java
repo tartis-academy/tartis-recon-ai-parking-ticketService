@@ -1,5 +1,6 @@
 package com.tartis_recon_ai_parking.application.ticket.usecase;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketDTO;
@@ -13,9 +14,12 @@ public class GetTicketUseCase {
     public GetTicketUseCase(TicketPersistence persistence){
         this.persistence=persistence;
     }
-   
+
     public TicketDTO getById (UUID id){
         return persistence.findById(id).map(TicketDTOFactory::toDTO).orElseThrow(() -> new TicketNotFoundException("No existe un ticket con id " + id));
     }
-    
+
+    public List<TicketDTO> getAll() {
+        return TicketDTOFactory.toDTOList(persistence.findAll());
+    }
 }
