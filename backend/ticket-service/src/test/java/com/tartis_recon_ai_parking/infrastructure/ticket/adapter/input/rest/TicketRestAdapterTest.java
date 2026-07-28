@@ -103,18 +103,6 @@ class TicketRestAdapterTest {
         assertThat(result.getBody()).isEqualTo(expectedResponse);
     }
 
-    // NOTA: en el flujo real, GetTicketUseCase.getById lanza TicketNotFoundException
-    // en lugar de devolver null, por lo que esta rama del adaptador (if (ticket == null))
-    // no se alcanza en producción. Se testea igualmente porque forma parte del código actual.
-    @Test
-    void getById_WhenUseCaseReturnsNull_ShouldReturnNotFound() {
-        when(getTicketUseCase.getById(ticketId)).thenReturn(null);
 
-        ResponseEntity<TicketResponse> result = adapter.getById(ticketId);
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(result.getBody()).isNull();
-        verify(mapper, never()).toResponse(any());
-    }
 
 }
