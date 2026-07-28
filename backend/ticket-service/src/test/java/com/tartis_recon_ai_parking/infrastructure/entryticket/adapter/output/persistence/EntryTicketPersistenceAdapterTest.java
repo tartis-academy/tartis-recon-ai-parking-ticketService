@@ -19,7 +19,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
+@DataJpaTest(properties = {
+        "spring.flyway.enabled=false",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
 @Testcontainers
 @EntityScan(basePackageClasses = EntryTicketEntity.class)
 @EnableJpaRepositories(basePackageClasses = EntryTicketRepository.class)

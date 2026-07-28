@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.stream.Collectors;
+import com.tartis_recon_ai_parking.domain.entryticket.exception.EntryTicketNotFoundException;
+import com.tartis_recon_ai_parking.domain.entryticket.exception.InvalidEntryTicketException;
+import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
+import com.tartis_recon_ai_parking.domain.ticket.exception.TicketNotFoundException;
 
 // Punto unico de traduccion de excepciones a HTTP (IN-36), alineado con el schema ErrorResponse de openapi.yml
 @RestControllerAdvice
@@ -39,6 +43,13 @@ public class CustomizedExceptionAdapter {
     @ExceptionHandler(EntryTicketNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleEntryTicketNotFound(EntryTicketNotFoundException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ProblemDetail handleTicketNotFound(TicketNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Recurso no encontrado");
+        return problem;
     }
 
     @ExceptionHandler(InvalidEntryTicketException.class)
@@ -95,5 +106,12 @@ public class CustomizedExceptionAdapter {
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message, HttpServletRequest request) {
         ErrorResponse body = new ErrorResponse(status.value(), status.name(), message, request.getRequestURI());
         return ResponseEntity.status(status).body(body);
+    }
+
+    @ExceptionHandler(InvalidTicketException.class)
+    public ProblemDetail handleInvalidTicket(InvalidTicketException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Datos de ticket no válidos");
+        return problem;
     }
 }
