@@ -27,6 +27,7 @@ import org.springframework.dao.QueryTimeoutException;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -163,7 +164,7 @@ class CustomizedExceptionAdapterTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("BAD_REQUEST", response.getBody().getError());
-        assertTrue(!response.getBody().getMessage().contains("Jackson"));
+        assertFalse(response.getBody().getMessage().contains("Jackson"));
     }
 
     @Test
@@ -244,7 +245,7 @@ class CustomizedExceptionAdapterTest {
         assertNotNull(response.getBody());
         assertEquals("INTERNAL_SERVER_ERROR", response.getBody().getError());
         assertEquals("An unexpected database error occurred. The request could not be processed.", response.getBody().getMessage());
-        assertTrue(!response.getBody().getMessage().contains("SQL syntax error"));
+        assertFalse(response.getBody().getMessage().contains("SQL syntax error"));
     }
 
     @Test
@@ -260,6 +261,6 @@ class CustomizedExceptionAdapterTest {
         assertNotNull(response.getBody());
         assertEquals("INTERNAL_SERVER_ERROR", response.getBody().getError());
         assertEquals("An unexpected error occurred. Please try again later.", response.getBody().getMessage());
-        assertTrue(!response.getBody().getMessage().contains("database driver"));
+        assertFalse(response.getBody().getMessage().contains("database driver"));
     }
 }

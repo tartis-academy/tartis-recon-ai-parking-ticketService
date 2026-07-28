@@ -22,7 +22,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.QueryTimeoutException;
-import java.sql.SQLException;
 import java.util.stream.Collectors;
 
 // Punto unico de traduccion de excepciones a HTTP (IN-36), alineado con el schema ErrorResponse de openapi.yml
@@ -107,7 +106,7 @@ public class CustomizedExceptionAdapter {
 
 
     // Captura cualquier otro error de base de datos ocultando detalles técnicos de la BD (HTTP 500).
-    @ExceptionHandler({DataAccessException.class, SQLException.class})
+    @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ErrorResponse> handleGenericDatabaseException(Exception ex, HttpServletRequest request) {
         log.error("Database exception while processing request [{} {}]", request.getMethod(), request.getRequestURI(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,
