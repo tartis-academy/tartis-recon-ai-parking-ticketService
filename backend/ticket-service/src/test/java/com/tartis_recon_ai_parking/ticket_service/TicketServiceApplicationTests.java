@@ -8,7 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
         "spring.datasource.driverClassName=org.h2.Driver",
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.flyway.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8180/realms/parking"
 })
 class TicketServiceApplicationTests {
 
