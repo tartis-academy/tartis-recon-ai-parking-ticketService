@@ -56,7 +56,7 @@ class TicketRestMapperTest {
 
         TicketResponse response = mapper.toResponse(dto);
 
-        assertThat(response.getId()).isEqualTo(id);
+        assertThat(response.getUniqueId()).isEqualTo(id);
         assertThat(response.getStayId()).isEqualTo(stayId);
         assertThat(response.getIssuedAt()).isEqualTo(issuedAt);
         assertThat(response.getTotalAmount()).isEqualByComparingTo(BigDecimal.valueOf(15.50));
@@ -80,7 +80,7 @@ class TicketRestMapperTest {
         List<TicketResponse> result = mapper.toResponseList(List.of(dto1, dto2));
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(dto1.getUniqueId());
-        assertThat(result.get(1).getId()).isEqualTo(dto2.getUniqueId());
+        assertThat(result.get(0).getUniqueId()).isEqualTo(dto1.getUniqueId());
+        assertThat(result.get(1).getUniqueId()).isEqualTo(dto2.getUniqueId());
     }
 }

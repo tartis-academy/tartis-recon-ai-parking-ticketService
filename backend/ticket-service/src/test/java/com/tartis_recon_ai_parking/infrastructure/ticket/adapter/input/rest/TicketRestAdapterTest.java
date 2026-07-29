@@ -61,7 +61,7 @@ class TicketRestAdapterTest {
                 .totalAmount(BigDecimal.ZERO)
                 .build();
         TicketResponse expectedResponse = TicketResponse.builder()
-                .id(ticketId)
+                .uniqueId(ticketId)
                 .stayId(stayId)
                 .issuedAt(createDTO.issuedAt())
                 .totalAmount(BigDecimal.ZERO)
@@ -88,7 +88,7 @@ class TicketRestAdapterTest {
                 .totalAmount(BigDecimal.TEN)
                 .build();
         TicketResponse expectedResponse = TicketResponse.builder()
-                .id(ticketId)
+                .uniqueId(ticketId)
                 .stayId(stayId)
                 .issuedAt(dto.getIssuedAt())
                 .totalAmount(BigDecimal.TEN)

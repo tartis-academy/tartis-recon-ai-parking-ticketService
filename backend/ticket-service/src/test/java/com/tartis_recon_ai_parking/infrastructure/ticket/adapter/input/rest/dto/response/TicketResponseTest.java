@@ -18,13 +18,13 @@ class TicketResponseTest {
         BigDecimal amount = new BigDecimal("15.00");
 
         TicketResponse response = TicketResponse.builder()
-                .id(id)
+                .uniqueId(id)
                 .stayId(stayId)
                 .issuedAt(issuedAt)
                 .totalAmount(amount)
                 .build();
 
-        assertThat(response.getId()).isEqualTo(id);
+        assertThat(response.getUniqueId()).isEqualTo(id);
         assertThat(response.getStayId()).isEqualTo(stayId);
         assertThat(response.getIssuedAt()).isEqualTo(issuedAt);
         assertThat(response.getTotalAmount()).isEqualByComparingTo(amount);
@@ -38,7 +38,7 @@ class TicketResponseTest {
 
         TicketResponse response = new TicketResponse(id, stayId, issuedAt, BigDecimal.ZERO);
 
-        assertThat(response.getId()).isEqualTo(id);
+        assertThat(response.getUniqueId()).isEqualTo(id);
         assertThat(response.getTotalAmount()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 }
