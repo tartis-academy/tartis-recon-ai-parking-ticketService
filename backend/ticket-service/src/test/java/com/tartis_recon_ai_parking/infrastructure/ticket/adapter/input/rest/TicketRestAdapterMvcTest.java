@@ -57,7 +57,7 @@ class TicketRestAdapterMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stayId\":\"" + stayId + "\"}"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(ticketId.toString()))
+                .andExpect(jsonPath("$.uniqueId").value(ticketId.toString()))
                 .andExpect(jsonPath("$.stayId").value(stayId.toString()));
     }
 
@@ -79,7 +79,7 @@ class TicketRestAdapterMvcTest {
 
         mockMvc.perform(get("/v1/tickets/{id}", ticketId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(ticketId.toString()))
+                .andExpect(jsonPath("$.uniqueId").value(ticketId.toString()))
                 .andExpect(jsonPath("$.stayId").value(stayId.toString()))
                 .andExpect(jsonPath("$.totalAmount").value(25.50));
     }

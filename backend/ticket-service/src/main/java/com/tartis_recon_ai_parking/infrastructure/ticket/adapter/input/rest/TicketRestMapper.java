@@ -21,7 +21,6 @@ public interface TicketRestMapper {
         return new TicketCreateDTO(request.getStayId(), Instant.now(), BigDecimal.ZERO);
     }
 
-    @org.mapstruct.Mapping(source = "uniqueId", target = "id")
     TicketResponse toResponse(TicketDTO ticket);
 
     List<TicketResponse> toResponseList(Iterable<TicketDTO> tickets);
