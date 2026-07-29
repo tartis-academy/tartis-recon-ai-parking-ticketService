@@ -22,7 +22,7 @@ public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersist
     @Override
     public Ticket save(Ticket ticket) {
         TicketEntity entity = ticketPersistenceMapper.toEntity(ticket);
-        TicketEntity savedEntity = ticketRepository.save(entity);
+        TicketEntity savedEntity = ticketRepository.saveAndFlush(entity);
         return ticketPersistenceMapper.toDomain(savedEntity);
     }
 
