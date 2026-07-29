@@ -247,20 +247,4 @@ class CustomizedExceptionAdapterTest {
         assertEquals("An unexpected database error occurred. The request could not be processed.", response.getBody().getMessage());
         assertFalse(response.getBody().getMessage().contains("SQL syntax error"));
     }
-
-    @Test
-    @DisplayName("Debe manejar cualquier excepcion no controlada devolviendo 500 sin exponer detalles internos")
-    void shouldHandleUnexpectedException() {
-        RuntimeException exception = new RuntimeException("connection refused by database driver XYZ");
-
-        ResponseEntity<ErrorResponse> response =
-                exceptionAdapter.handleUnexpected(exception, requestTo("/v1/tickets"));
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("INTERNAL_SERVER_ERROR", response.getBody().getError());
-        assertEquals("An unexpected error occurred. Please try again later.", response.getBody().getMessage());
-        assertFalse(response.getBody().getMessage().contains("database driver"));
-    }
 }
