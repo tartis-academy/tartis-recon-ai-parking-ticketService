@@ -25,7 +25,7 @@ class TicketDTOFactoryTest {
 
         TicketDTO dto = TicketDTOFactory.toDTO(ticket);
 
-        assertThat(dto.getId()).isEqualTo(ticket.getUniqueId());
+        assertThat(dto.getUniqueId()).isEqualTo(ticket.getUniqueId());
         assertThat(dto.getStayId()).isEqualTo(stayId);
         assertThat(dto.getIssuedAt()).isEqualTo(issuedAt);
         assertThat(dto.getTotalAmount()).isEqualByComparingTo(BigDecimal.valueOf(12.50));
@@ -39,8 +39,8 @@ class TicketDTOFactoryTest {
         List<TicketDTO> result = TicketDTOFactory.toDTOList(List.of(ticket1, ticket2));
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(ticket1.getUniqueId());
-        assertThat(result.get(1).getId()).isEqualTo(ticket2.getUniqueId());
+        assertThat(result.get(0).getUniqueId()).isEqualTo(ticket1.getUniqueId());
+        assertThat(result.get(1).getUniqueId()).isEqualTo(ticket2.getUniqueId());
     }
 
     @Test

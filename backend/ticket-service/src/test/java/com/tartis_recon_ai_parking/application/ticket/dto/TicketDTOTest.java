@@ -18,13 +18,13 @@ class TicketDTOTest {
         BigDecimal amount = new BigDecimal("25.50");
 
         TicketDTO dto = TicketDTO.builder()
-                .id(id)
+                .uniqueId(id)
                 .stayId(stayId)
                 .issuedAt(issuedAt)
                 .totalAmount(amount)
                 .build();
 
-        assertThat(dto.getId()).isEqualTo(id);
+        assertThat(dto.getUniqueId()).isEqualTo(id);
         assertThat(dto.getStayId()).isEqualTo(stayId);
         assertThat(dto.getIssuedAt()).isEqualTo(issuedAt);
         assertThat(dto.getTotalAmount()).isEqualByComparingTo(amount);
@@ -38,7 +38,7 @@ class TicketDTOTest {
 
         TicketDTO dto = new TicketDTO(id, stayId, issuedAt, BigDecimal.ZERO);
 
-        assertThat(dto.getId()).isEqualTo(id);
+        assertThat(dto.getUniqueId()).isEqualTo(id);
         assertThat(dto.getStayId()).isEqualTo(stayId);
         assertThat(dto.getTotalAmount()).isEqualByComparingTo(BigDecimal.ZERO);
     }
@@ -46,7 +46,7 @@ class TicketDTOTest {
     @Test
     void shouldAllowNullFieldsViaBuilder() {
         TicketDTO dto = TicketDTO.builder().build();
-        assertThat(dto.getId()).isNull();
+        assertThat(dto.getUniqueId()).isNull();
         assertThat(dto.getStayId()).isNull();
         assertThat(dto.getIssuedAt()).isNull();
         assertThat(dto.getTotalAmount()).isNull();

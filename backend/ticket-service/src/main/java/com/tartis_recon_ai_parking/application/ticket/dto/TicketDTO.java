@@ -13,7 +13,7 @@ import lombok.Getter;
 @Builder
 public class TicketDTO {
 
-    private final UUID id;
+    private final UUID uniqueId;
     private final UUID stayId;
     private final Instant issuedAt;
     private final BigDecimal totalAmount;
