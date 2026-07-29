@@ -55,7 +55,7 @@ class TicketRestAdapterTest {
         TicketRequest request = TicketRequest.builder().stayId(stayId).build();
         TicketCreateDTO createDTO = new TicketCreateDTO(stayId, Instant.now(), BigDecimal.ZERO);
         TicketDTO savedDto = TicketDTO.builder()
-                .id(ticketId)
+                .uniqueId(ticketId)
                 .stayId(stayId)
                 .issuedAt(createDTO.issuedAt())
                 .totalAmount(BigDecimal.ZERO)
@@ -82,7 +82,7 @@ class TicketRestAdapterTest {
     @Test
     void getById_WhenTicketExists_ShouldReturnOkWithMappedResponse() {
         TicketDTO dto = TicketDTO.builder()
-                .id(ticketId)
+                .uniqueId(ticketId)
                 .stayId(stayId)
                 .issuedAt(Instant.now())
                 .totalAmount(BigDecimal.TEN)

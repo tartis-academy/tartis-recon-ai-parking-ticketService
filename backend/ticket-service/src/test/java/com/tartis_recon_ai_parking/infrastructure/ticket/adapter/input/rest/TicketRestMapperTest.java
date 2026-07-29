@@ -48,7 +48,7 @@ class TicketRestMapperTest {
         UUID stayId = UUID.randomUUID();
         Instant issuedAt = Instant.now();
         TicketDTO dto = TicketDTO.builder()
-                .id(id)
+                .uniqueId(id)
                 .stayId(stayId)
                 .issuedAt(issuedAt)
                 .totalAmount(BigDecimal.valueOf(15.50))
@@ -65,13 +65,13 @@ class TicketRestMapperTest {
     @Test
     void toResponseList_ShouldMapEachElementOfTheList() {
         TicketDTO dto1 = TicketDTO.builder()
-                .id(UUID.randomUUID())
+                .uniqueId(UUID.randomUUID())
                 .stayId(UUID.randomUUID())
                 .issuedAt(Instant.now())
                 .totalAmount(BigDecimal.ONE)
                 .build();
         TicketDTO dto2 = TicketDTO.builder()
-                .id(UUID.randomUUID())
+                .uniqueId(UUID.randomUUID())
                 .stayId(UUID.randomUUID())
                 .issuedAt(Instant.now())
                 .totalAmount(BigDecimal.TEN)
@@ -80,7 +80,7 @@ class TicketRestMapperTest {
         List<TicketResponse> result = mapper.toResponseList(List.of(dto1, dto2));
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(dto1.getId());
-        assertThat(result.get(1).getId()).isEqualTo(dto2.getId());
+        assertThat(result.get(0).getId()).isEqualTo(dto1.getUniqueId());
+        assertThat(result.get(1).getId()).isEqualTo(dto2.getUniqueId());
     }
 }
