@@ -49,14 +49,14 @@ class TicketPersistenceAdapterTest {
         Ticket expectedDomain = Ticket.recreate(ticketId, stayId, Instant.now(), BigDecimal.TEN);
 
         when(ticketPersistenceMapper.toEntity(ticket)).thenReturn(entityToSave);
-        when(ticketRepository.save(entityToSave)).thenReturn(savedEntity);
+        when(ticketRepository.saveAndFlush(any(TicketEntity.class))).thenReturn(savedEntity);
         when(ticketPersistenceMapper.toDomain(savedEntity)).thenReturn(expectedDomain);
 
         Ticket result = adapter.save(ticket);
 
         assertThat(result).isSameAs(expectedDomain);
         verify(ticketPersistenceMapper).toEntity(ticket);
-        verify(ticketRepository).save(entityToSave);
+        verify(ticketRepository).saveAndFlush(entityToSave);
         verify(ticketPersistenceMapper).toDomain(savedEntity);
     }
 
