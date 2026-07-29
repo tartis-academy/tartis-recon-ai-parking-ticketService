@@ -19,9 +19,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.QueryTimeoutException;
+
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -158,7 +164,7 @@ class CustomizedExceptionAdapterTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("BAD_REQUEST", response.getBody().getError());
-        assertTrue(!response.getBody().getMessage().contains("Jackson"));
+        assertFalse(response.getBody().getMessage().contains("Jackson"));
     }
 
     @Test
@@ -195,6 +201,54 @@ class CustomizedExceptionAdapterTest {
     }
 
     @Test
+    @DisplayName("Debe manejar DataIntegrityViolationException devolviendo 409 Conflict")
+    void shouldHandleDataIntegrityViolation() {
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("Constraint violation");
+
+        ResponseEntity<ErrorResponse> response =
+                exceptionAdapter.handleDataIntegrityViolation(exception, requestTo("/v1/tickets"));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("CONFLICT", response.getBody().getError());
+        assertEquals("The operation violates database constraints or uniqueness requirements.", response.getBody().getMessage());
+        assertEquals("/v1/tickets", response.getBody().getPath());
+    }
+
+    @Test
+    @DisplayName("Debe manejar DataAccessResourceFailureException y QueryTimeoutException devolviendo 503 Service Unavailable")
+    void shouldHandleDatabaseTimeoutAndConnectionErrors() {
+        DataAccessResourceFailureException exception = new DataAccessResourceFailureException("DB down");
+
+        ResponseEntity<ErrorResponse> response =
+                exceptionAdapter.handleDatabaseTimeoutAndConnectionErrors(exception, requestTo("/v1/tickets"));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("SERVICE_UNAVAILABLE", response.getBody().getError());
+        assertEquals("The database is unreachable or the operation timed out. Please try again later.", response.getBody().getMessage());
+    }
+
+
+    @Test
+    @DisplayName("Debe manejar DataAccessException devolviendo 500 Internal Server Error sin exponer detalles de BD")
+    void shouldHandleGenericDatabaseException() {
+        DataAccessException exception = new DataAccessException("SQL syntax error in driver") {};
+
+        ResponseEntity<ErrorResponse> response =
+                exceptionAdapter.handleGenericDatabaseException(exception, requestTo("/v1/tickets"));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("INTERNAL_SERVER_ERROR", response.getBody().getError());
+        assertEquals("An unexpected database error occurred. The request could not be processed.", response.getBody().getMessage());
+        assertFalse(response.getBody().getMessage().contains("SQL syntax error"));
+    }
+
+    @Test
     @DisplayName("Debe manejar cualquier excepcion no controlada devolviendo 500 sin exponer detalles internos")
     void shouldHandleUnexpectedException() {
         RuntimeException exception = new RuntimeException("connection refused by database driver XYZ");
@@ -207,6 +261,6 @@ class CustomizedExceptionAdapterTest {
         assertNotNull(response.getBody());
         assertEquals("INTERNAL_SERVER_ERROR", response.getBody().getError());
         assertEquals("An unexpected error occurred. Please try again later.", response.getBody().getMessage());
-        assertTrue(!response.getBody().getMessage().contains("database driver"));
+        assertFalse(response.getBody().getMessage().contains("database driver"));
     }
 }
