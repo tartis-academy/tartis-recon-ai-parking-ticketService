@@ -14,6 +14,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -61,5 +64,27 @@ class TicketEventListenerAdapterTest {
         assertEquals(totalAmount, capturedDto.totalAmount());
         // issuedAt is Instant.now(), we just verify it's not null
         assertEquals(true, capturedDto.issuedAt() != null);
+    }
+
+    @Test
+    void handleStayClosedEvent_whenUseCaseThrowsException_shouldPropagateException() throws InvalidTicketException {
+        // Arrange
+        StayClosedEventData data = new StayClosedEventData(UUID.randomUUID(), "1234ABC", "A-12", Instant.now(), Instant.now(), BigDecimal.TEN);
+        StayClosedEvent event = new StayClosedEvent(UUID.randomUUID(), "StayClosedEvent", "v1", Instant.now(), data);
+        
+        doThrow(new InvalidTicketException("Ticket is invalid"))
+                .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
+
+        // Act & Assert
+        assertThrows(InvalidTicketException.class, () -> adapter.handleStayClosedEvent(event));
+    }
+
+    @Test
+    void handleStayClosedEvent_whenDataIsNull_shouldThrowNullPointerException() {
+        // Arrange
+        StayClosedEvent event = new StayClosedEvent(UUID.randomUUID(), "StayClosedEvent", "v1", Instant.now(), null);
+
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> adapter.handleStayClosedEvent(event));
     }
 }
