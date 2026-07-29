@@ -15,7 +15,7 @@ public class TicketEntity{
     @Id
     private UUID uniqueId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private UUID stayId;
 
     @Column(nullable = false)

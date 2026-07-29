@@ -8,6 +8,7 @@ import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlist
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -36,12 +37,10 @@ class TicketEventListenerAdapterTest {
         // Arrange
         UUID stayId = UUID.randomUUID();
         BigDecimal totalAmount = new BigDecimal("15.50");
+        Instant exitDate = Instant.now();
         StayClosedEventData data = new StayClosedEventData(
                 stayId,
-                "1234ABC",
-                "A-12",
-                Instant.now(),
-                Instant.now(),
+                exitDate,
                 totalAmount
         );
         StayClosedEvent event = new StayClosedEvent(
@@ -62,14 +61,13 @@ class TicketEventListenerAdapterTest {
         TicketCreateDTO capturedDto = captor.getValue();
         assertEquals(stayId, capturedDto.stayId());
         assertEquals(totalAmount, capturedDto.totalAmount());
-        // issuedAt is Instant.now(), we just verify it's not null
-        assertEquals(true, capturedDto.issuedAt() != null);
+        assertEquals(exitDate, capturedDto.issuedAt());
     }
 
     @Test
     void handleStayClosedEvent_whenUseCaseThrowsException_shouldPropagateException() throws InvalidTicketException {
         // Arrange
-        StayClosedEventData data = new StayClosedEventData(UUID.randomUUID(), "1234ABC", "A-12", Instant.now(), Instant.now(), BigDecimal.TEN);
+        StayClosedEventData data = new StayClosedEventData(UUID.randomUUID(), Instant.now(), BigDecimal.TEN);
         StayClosedEvent event = new StayClosedEvent(UUID.randomUUID(), "StayClosedEvent", "v1", Instant.now(), data);
         
         doThrow(new InvalidTicketException("Ticket is invalid"))
@@ -86,5 +84,20 @@ class TicketEventListenerAdapterTest {
 
         // Act & Assert
         assertThrows(NullPointerException.class, () -> adapter.handleStayClosedEvent(event));
+    }
+
+    @Test
+    void handleStayClosedEvent_whenDataIntegrityViolationException_shouldIgnore() throws InvalidTicketException {
+        // Arrange
+        StayClosedEventData data = new StayClosedEventData(UUID.randomUUID(), Instant.now(), BigDecimal.TEN);
+        StayClosedEvent event = new StayClosedEvent(UUID.randomUUID(), "StayClosedEvent", "v1", Instant.now(), data);
+        
+        doThrow(new DataIntegrityViolationException("Duplicate key"))
+                .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
+
+        // Act & Assert
+        // Should not throw any exception
+        adapter.handleStayClosedEvent(event);
+        verify(createTicketUseCase).execute(any(TicketCreateDTO.class));
     }
 }

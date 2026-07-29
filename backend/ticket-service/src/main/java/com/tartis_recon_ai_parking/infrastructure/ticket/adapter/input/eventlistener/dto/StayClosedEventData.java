@@ -6,9 +6,6 @@ import java.util.UUID;
 
 public record StayClosedEventData(
         UUID stayId,
-        String plate,
-        String spotCode,
-        Instant entryDate,
         Instant exitDate,
         BigDecimal totalAmount
 ) {
