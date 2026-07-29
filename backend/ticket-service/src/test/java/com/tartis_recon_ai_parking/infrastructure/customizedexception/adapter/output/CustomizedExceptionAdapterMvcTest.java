@@ -21,6 +21,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.core.authority.AuthorityUtils.createAuthorityList;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,7 +47,7 @@ class CustomizedExceptionAdapterMvcTest {
                 .thenThrow(new DataIntegrityViolationException("Unique constraint violation"));
 
         mockMvc.perform(get("/v1/tickets/" + id)
-                        .with(jwt()))
+                        .with(jwt().authorities(createAuthorityList("ROLE_ADMIN"))))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("CONFLICT"))
@@ -61,7 +62,7 @@ class CustomizedExceptionAdapterMvcTest {
                 .thenThrow(new DataAccessResourceFailureException("Database unreachable"));
 
         mockMvc.perform(get("/v1/tickets/" + id)
-                        .with(jwt()))
+                        .with(jwt().authorities(createAuthorityList("ROLE_ADMIN"))))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.status").value(503))
                 .andExpect(jsonPath("$.error").value("SERVICE_UNAVAILABLE"))
@@ -76,7 +77,7 @@ class CustomizedExceptionAdapterMvcTest {
                 .thenThrow(new DataAccessException("SQL syntax error near SELECT") {});
 
         mockMvc.perform(get("/v1/tickets/" + id)
-                        .with(jwt()))
+                        .with(jwt().authorities(createAuthorityList("ROLE_ADMIN"))))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.status").value(500))
                 .andExpect(jsonPath("$.error").value("INTERNAL_SERVER_ERROR"))
