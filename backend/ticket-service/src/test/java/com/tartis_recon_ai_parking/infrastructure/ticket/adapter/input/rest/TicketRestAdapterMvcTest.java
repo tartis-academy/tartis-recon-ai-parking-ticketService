@@ -45,7 +45,7 @@ class TicketRestAdapterMvcTest {
         Instant issuedAt = Instant.now();
 
         TicketDTO savedDto = TicketDTO.builder()
-                .id(ticketId)
+                .uniqueId(ticketId)
                 .stayId(stayId)
                 .issuedAt(issuedAt)
                 .totalAmount(BigDecimal.ZERO)
@@ -69,7 +69,7 @@ class TicketRestAdapterMvcTest {
         Instant issuedAt = Instant.now();
 
         TicketDTO dto = TicketDTO.builder()
-                .id(ticketId)
+                .uniqueId(ticketId)
                 .stayId(stayId)
                 .issuedAt(issuedAt)
                 .totalAmount(BigDecimal.valueOf(25.50))
