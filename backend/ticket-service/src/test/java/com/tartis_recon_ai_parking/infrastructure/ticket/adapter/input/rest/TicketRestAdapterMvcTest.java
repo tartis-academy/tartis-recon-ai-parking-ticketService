@@ -4,6 +4,7 @@ import com.tartis_recon_ai_parking.application.ticket.dto.TicketDTO;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
 import com.tartis_recon_ai_parking.application.ticket.usecase.GetTicketUseCase;
 import com.tartis_recon_ai_parking.domain.ticket.exception.TicketNotFoundException;
+import com.tartis_recon_ai_parking.infrastructure.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,14 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TicketRestAdapter.class)
-@Import(TicketRestMapperImpl.class)
+@Import({TicketRestMapperImpl.class, SecurityConfig.class})
 class TicketRestAdapterMvcTest {
 
     @Autowired
@@ -54,6 +56,7 @@ class TicketRestAdapterMvcTest {
         when(createUseCase.execute(any())).thenReturn(savedDto);
 
         mockMvc.perform(post("/v1/tickets")
+                        .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stayId\":\"" + stayId + "\"}"))
                 .andExpect(status().isCreated())
@@ -77,7 +80,8 @@ class TicketRestAdapterMvcTest {
 
         when(getTicketUseCase.getById(ticketId)).thenReturn(dto);
 
-        mockMvc.perform(get("/v1/tickets/{id}", ticketId))
+        mockMvc.perform(get("/v1/tickets/{id}", ticketId)
+                        .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.uniqueId").value(ticketId.toString()))
                 .andExpect(jsonPath("$.stayId").value(stayId.toString()))
@@ -91,7 +95,8 @@ class TicketRestAdapterMvcTest {
         when(getTicketUseCase.getById(ticketId))
                 .thenThrow(new TicketNotFoundException("No existe un ticket con id " + ticketId));
 
-        mockMvc.perform(get("/v1/tickets/{id}", ticketId))
+        mockMvc.perform(get("/v1/tickets/{id}", ticketId)
+                        .with(jwt()))
                 .andExpect(status().isNotFound());
     }
 
@@ -99,6 +104,7 @@ class TicketRestAdapterMvcTest {
     @DisplayName("POST /v1/tickets debería devolver 400 con body vacío")
     void createTicket_shouldReturn400WithEmptyBody() throws Exception {
         mockMvc.perform(post("/v1/tickets")
+                        .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
@@ -107,7 +113,9 @@ class TicketRestAdapterMvcTest {
     @Test
     @DisplayName("GET /v1/tickets/{id} debería devolver 400 con id inválido")
     void getById_shouldReturn400WithInvalidUuid() throws Exception {
-        mockMvc.perform(get("/v1/tickets/{id}", "not-a-uuid"))
+        mockMvc.perform(get("/v1/tickets/{id}", "not-a-uuid")
+                        .with(jwt()))
                 .andExpect(status().isBadRequest());
     }
 }
+

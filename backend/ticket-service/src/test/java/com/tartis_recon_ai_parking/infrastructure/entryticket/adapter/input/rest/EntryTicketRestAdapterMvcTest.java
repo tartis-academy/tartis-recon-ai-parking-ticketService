@@ -3,6 +3,7 @@ package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.res
 import java.time.Instant;
 import java.util.UUID;
 
+import com.tartis_recon_ai_parking.infrastructure.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,25 +18,13 @@ import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicke
 import com.tartis_recon_ai_parking.domain.entryticket.exception.EntryTicketNotFoundException;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Adaptador REST: test de slice con MockMvc para GET /v1/entry-tickets/{id}/code.
- *
- * - @WebMvcTest carga solo la capa web (sin JPA, sin base de datos).
- * - @Import mete el mapper REAL generado por MapStruct, no un mock: asi el
- *   jsonPath("$.id") verifica de verdad el mapeo, no lo que le digamos al mock.
- * - CustomizedExceptionAdapter NO se importa: @WebMvcTest recoge los
- *   @ControllerAdvice automaticamente, por eso el test del 404 es real.
- *
- * Requiere la dependencia "spring-boot-webmvc-test" (scope test) en el pom,
- * ya que en Spring Boot 4 el slice de @WebMvcTest se separo de
- * spring-boot-starter-test.
- */
 @WebMvcTest(EntryTicketRestAdapter.class)
-@Import(EntryTicketRestMapperImpl.class)
+@Import({EntryTicketRestMapperImpl.class, SecurityConfig.class})
 class EntryTicketRestAdapterMvcTest {
 
     private static final String URL = "/v1/entry-tickets/{id}/code";
@@ -60,7 +49,8 @@ class EntryTicketRestAdapterMvcTest {
         when(getUseCase.execute(id))
                 .thenReturn(new EntryTicketDTO(id, stayId, Instant.now(), code));
 
-        mockMvc.perform(get(URL, id))
+        mockMvc.perform(get(URL, id)
+                        .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.stayId").value(stayId.toString()))
@@ -76,14 +66,16 @@ class EntryTicketRestAdapterMvcTest {
         when(getUseCase.execute(id))
                 .thenThrow(new EntryTicketNotFoundException("EntryTicket not found: " + id));
 
-        mockMvc.perform(get(URL, id))
+        mockMvc.perform(get(URL, id)
+                        .with(jwt()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("GET /{id}/code devuelve 400 cuando el id no es un UUID valido")
     void shouldReturn400WhenIdIsNotUuid() throws Exception {
-        mockMvc.perform(get(URL, "no-soy-un-uuid"))
+        mockMvc.perform(get(URL, "no-soy-un-uuid")
+                        .with(jwt()))
                 .andExpect(status().isBadRequest());
     }
 }

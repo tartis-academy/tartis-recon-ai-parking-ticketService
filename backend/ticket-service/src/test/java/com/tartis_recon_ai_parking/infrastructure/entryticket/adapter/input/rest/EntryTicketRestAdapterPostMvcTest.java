@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import com.tartis_recon_ai_parking.infrastructure.config.SecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +21,14 @@ import com.tartis_recon_ai_parking.domain.entryticket.exception.InvalidEntryTick
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(EntryTicketRestAdapter.class)
-@Import(EntryTicketRestMapperImpl.class)
+@Import({EntryTicketRestMapperImpl.class, SecurityConfig.class})
 class EntryTicketRestAdapterPostMvcTest {
 
     @Autowired
@@ -50,6 +52,7 @@ class EntryTicketRestAdapterPostMvcTest {
                 .thenReturn(new EntryTicketDTO(ticketId, stayId, now, code));
 
         mockMvc.perform(post("/v1/entry-tickets")
+                        .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stayId\":\"" + stayId + "\"}"))
                 .andExpect(status().isCreated())
@@ -65,6 +68,7 @@ class EntryTicketRestAdapterPostMvcTest {
                 .thenThrow(new InvalidEntryTicketException("stayId is null"));
 
         mockMvc.perform(post("/v1/entry-tickets")
+                        .with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stayId\":null}"))
                 .andExpect(status().isBadRequest());
@@ -75,7 +79,8 @@ class EntryTicketRestAdapterPostMvcTest {
     void getAllEntryTickets_shouldReturnEmptyList() throws Exception {
         when(getUseCase.getAll()).thenReturn(List.of());
 
-        mockMvc.perform(get("/v1/entry-tickets"))
+        mockMvc.perform(get("/v1/entry-tickets")
+                        .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
@@ -91,9 +96,11 @@ class EntryTicketRestAdapterPostMvcTest {
                 new EntryTicketDTO(id2, UUID.randomUUID(), Instant.now(), "CODE2")
         ));
 
-        mockMvc.perform(get("/v1/entry-tickets"))
+        mockMvc.perform(get("/v1/entry-tickets")
+                        .with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(2));
     }
 }
+
