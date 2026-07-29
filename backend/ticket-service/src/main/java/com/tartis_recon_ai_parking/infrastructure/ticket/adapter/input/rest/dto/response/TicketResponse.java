@@ -13,7 +13,7 @@ import lombok.Getter;
 @Builder
 public class TicketResponse {
 
-    private UUID id;
+    private UUID uniqueId;
     private UUID stayId;
     private Instant issuedAt;
     private BigDecimal totalAmount;
