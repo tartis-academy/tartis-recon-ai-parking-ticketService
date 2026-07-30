@@ -11,4 +11,8 @@ public interface TicketPersistence {
     Optional<Ticket> findById(UUID id);
 
     List<Ticket> findAll();
+
+    TicketPage findPage(String search, int page, int size);
+
+    record TicketPage(List<Ticket> content, int page, int size, long totalElements, int totalPages) {}
 }
