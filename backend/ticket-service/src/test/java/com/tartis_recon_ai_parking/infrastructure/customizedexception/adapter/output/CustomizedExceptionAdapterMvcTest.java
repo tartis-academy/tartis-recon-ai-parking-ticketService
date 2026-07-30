@@ -55,6 +55,21 @@ class CustomizedExceptionAdapterMvcTest {
     }
 
     @Test
+    @DisplayName("Debe capturar TicketAlreadyExistsException via @RestControllerAdvice y responder HTTP 409 Conflict")
+    void shouldReturn409WhenTicketAlreadyExists() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(getTicketUseCase.getById(any()))
+                .thenThrow(new com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException("Ya existe un ticket"));
+
+        mockMvc.perform(get("/v1/tickets/" + id)
+                        .with(jwt().authorities(createAuthorityList("ROLE_ADMIN"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("CONFLICT"))
+                .andExpect(jsonPath("$.message").value("Ya existe un ticket"));
+    }
+
+    @Test
     @DisplayName("Debe capturar DataAccessResourceFailureException via @RestControllerAdvice y responder HTTP 503 Service Unavailable")
     void shouldReturn503WhenDatabaseUnreachable() throws Exception {
         UUID id = UUID.randomUUID();

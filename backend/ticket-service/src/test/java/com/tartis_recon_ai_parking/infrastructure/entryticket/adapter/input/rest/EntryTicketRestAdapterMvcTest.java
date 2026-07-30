@@ -3,6 +3,7 @@ package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.res
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
+import com.tartis_recon_ai_parking.application.entryticket.usecase.UpdateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.EntryTicketNotFoundException;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.InvalidEntryTicketException;
 import com.tartis_recon_ai_parking.infrastructure.config.SecurityConfig;
@@ -41,6 +42,9 @@ class EntryTicketRestAdapterMvcTest {
 
     @MockitoBean
     private CreateEntryTicketUseCase createUseCase;
+
+    @MockitoBean
+    private UpdateEntryTicketUseCase updateUseCase;
 
 
 
@@ -148,14 +152,24 @@ class EntryTicketRestAdapterMvcTest {
     }
 
     @Test
-    @DisplayName("PUT /v1/entry-tickets/{id} deberia devolver 200 para ADMIN (endpoint pendiente de implementar)")
+    @DisplayName("PUT /v1/entry-tickets/{id} deberia devolver 200 para ADMIN")
     void updateEntryTicket_shouldReturn200ForAdmin() throws Exception {
         UUID id = UUID.randomUUID();
+        UUID stayId = UUID.randomUUID();
+        String code = "UPDATEDCODE";
+        Instant now = Instant.now();
+
+        when(updateUseCase.execute(eq(id), any()))
+                .thenReturn(new EntryTicketDTO(id, stayId, now, code));
+
         mockMvc.perform(put("/v1/entry-tickets/{id}", id)
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"stayId\":\"" + UUID.randomUUID() + "\"}"))
-                .andExpect(status().isOk());
+                        .content("{\"stayId\":\"" + stayId + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.stayId").value(stayId.toString()))
+                .andExpect(jsonPath("$.code").value(code));
     }
 
 

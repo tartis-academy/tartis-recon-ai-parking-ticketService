@@ -78,6 +78,25 @@ class CustomizedExceptionAdapterTest {
     }
 
     @Test
+    @DisplayName("Debe manejar TicketAlreadyExistsException retornando 409 Conflict")
+    void shouldHandleTicketAlreadyExistsException() {
+        com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException exception =
+                new com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException("Ya existe un ticket para el stayId");
+
+        ResponseEntity<ErrorResponse> response =
+                exceptionAdapter.handleTicketAlreadyExists(exception, requestTo("/v1/tickets"));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.CONFLICT.value(), response.getBody().getStatus());
+        assertEquals("CONFLICT", response.getBody().getError());
+        assertEquals(exception.getMessage(), response.getBody().getMessage());
+        assertEquals("/v1/tickets", response.getBody().getPath());
+        assertNotNull(response.getBody().getTimestamp());
+    }
+
+    @Test
     @DisplayName("Debe manejar EntryTicketNotFoundException retornando 404 Not Found")
     void shouldHandleEntryTicketNotFoundException() {
         UUID id = UUID.randomUUID();

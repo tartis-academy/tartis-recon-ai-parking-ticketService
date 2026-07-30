@@ -3,12 +3,14 @@ package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.output.pe
 import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTicketPersistence;
 import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@Transactional
 public class EntryTicketPersistenceAdapter implements EntryTicketPersistence {
 
     private final EntryTicketRepository repository;
@@ -23,7 +25,7 @@ public class EntryTicketPersistenceAdapter implements EntryTicketPersistence {
     @Override
     public EntryTicket save(EntryTicket entryTicket) {
         EntryTicketEntity entity = mapper.toEntity(entryTicket);
-        EntryTicketEntity saved = repository.save(entity);
+        EntryTicketEntity saved = repository.saveAndFlush(entity);
         return mapper.toDomain(saved);
     }
 
@@ -48,5 +50,10 @@ public class EntryTicketPersistenceAdapter implements EntryTicketPersistence {
         return repository.findAll().stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Optional<EntryTicket> findByIdForUpdate(UUID id) {
+        return repository.findByIdForUpdate(id).map(mapper::toDomain);
     }
 }
