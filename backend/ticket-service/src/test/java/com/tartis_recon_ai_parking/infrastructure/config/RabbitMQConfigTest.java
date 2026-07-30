@@ -37,10 +37,12 @@ class RabbitMQConfigTest {
     }
 
     @Test
-    void colaConElNombreQueEsperaStayService() {
+    void colaConElNombreQueEsperaStayServiceYArgumentosDLQ() {
         Queue queue = config.ticketStayClosedQueue();
 
         assertEquals(TICKET_QUEUE, queue.getName());
+        assertEquals("ticket-service-stay-closed-dlx", queue.getArguments().get("x-dead-letter-exchange"));
+        assertEquals("ticket-service-stay-closed-dead-letter", queue.getArguments().get("x-dead-letter-routing-key"));
     }
 
     @Test
@@ -53,5 +55,22 @@ class RabbitMQConfigTest {
         assertEquals(TICKET_QUEUE, binding.getDestination());
         assertEquals(EXCHANGE_NAME, binding.getExchange());
         assertEquals(ROUTING_KEY, binding.getRoutingKey());
+    }
+
+    @Test
+    void debeConfigurarCorrectamenteInfraestructuraDLQ() {
+        TopicExchange dlx = config.ticketStayClosedDLX();
+        assertEquals("ticket-service-stay-closed-dlx", dlx.getName());
+
+        Queue dlq = config.ticketStayClosedDLQ();
+        assertEquals("ticket-service-stay-closed-dlq", dlq.getName());
+
+        Binding dlqBinding = config.bindingTicketStayClosedDLQ(dlq, dlx);
+        assertEquals("ticket-service-stay-closed-dlq", dlqBinding.getDestination());
+        assertEquals("ticket-service-stay-closed-dlx", dlqBinding.getExchange());
+        assertEquals("ticket-service-stay-closed-dead-letter", dlqBinding.getRoutingKey());
+
+        org.springframework.amqp.rabbit.core.RabbitTemplate mockTemplate = org.mockito.Mockito.mock(org.springframework.amqp.rabbit.core.RabbitTemplate.class);
+        org.junit.jupiter.api.Assertions.assertNotNull(config.messageRecoverer(mockTemplate));
     }
 }
