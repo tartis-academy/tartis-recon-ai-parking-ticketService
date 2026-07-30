@@ -24,6 +24,9 @@ public class GetTicketUseCase {
     }
 
     public TicketPageDTO getPage(String search, int page, int size) {
+        if (search != null && search.trim().isEmpty()) {
+            search = null;
+        }
         TicketPersistence.TicketPage result = persistence.findPage(search, page, size);
         List<TicketDTO> content = TicketDTOFactory.toDTOList(result.content());
         return new TicketPageDTO(content, result.page(), result.size(), result.totalElements(), result.totalPages());
