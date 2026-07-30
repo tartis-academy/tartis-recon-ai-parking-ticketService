@@ -118,4 +118,21 @@ class CreateTicketUseCaseTest {
         assertThrows(TicketAlreadyExistsException.class, () -> useCase.execute(createDTO));
         verify(ticketPersistence, never()).save(any());
     }
+
+    @Test
+    void execute_deberiaNoConsultarExistsByStayId_cuandoStayIdEsNull() throws InvalidTicketException {
+        // given
+        when(createDTO.stayId()).thenReturn(null);
+        factoryMock.when(() -> TicketDTOFactory.toDomain(createDTO)).thenReturn(ticketDomain);
+        when(ticketPersistence.save(ticketDomain)).thenReturn(savedTicket);
+        factoryMock.when(() -> TicketDTOFactory.toDTO(savedTicket)).thenReturn(expectedDTO);
+
+        // when
+        TicketDTO result = useCase.execute(createDTO);
+
+        // then
+        assertNotNull(result);
+        verify(ticketPersistence, never()).existsByStayId(any());
+        verify(ticketPersistence, times(1)).save(ticketDomain);
+    }
 }

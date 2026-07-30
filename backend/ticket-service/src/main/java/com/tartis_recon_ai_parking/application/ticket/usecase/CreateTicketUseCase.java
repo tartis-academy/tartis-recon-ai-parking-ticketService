@@ -18,7 +18,7 @@ public class CreateTicketUseCase {
 
     public TicketDTO execute(TicketCreateDTO createDTO) throws InvalidTicketException {
         if (createDTO.stayId() != null && ticketPersistence.existsByStayId(createDTO.stayId())) {
-            throw new TicketAlreadyExistsException("Ya existe un ticket para el stayId " + createDTO.stayId());
+            throw new TicketAlreadyExistsException(String.format("Ya existe un ticket para el stayId %s", createDTO.stayId()));
         }
         Ticket ticket = TicketDTOFactory.toDomain(createDTO);
         return TicketDTOFactory.toDTO(ticketPersistence.save(ticket));

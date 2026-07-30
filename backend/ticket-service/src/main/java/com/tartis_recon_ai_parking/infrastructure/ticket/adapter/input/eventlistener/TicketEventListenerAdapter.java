@@ -34,8 +34,10 @@ public class TicketEventListenerAdapter {
         try {
             createTicketUseCase.execute(createDTO);
             logger.info("Ticket created successfully for stayId: {}", event.data().stayId());
-        } catch (TicketAlreadyExistsException | DataIntegrityViolationException e) {
-            logger.warn("Ticket already exists for stayId: {}. Ignoring duplicate event (Idempotency).", event.data().stayId());
+        } catch (TicketAlreadyExistsException e) {
+            logger.warn("Idempotencia activada (comprobación previa): El ticket para stayId {} ya existe. Ignorando evento duplicado.", event.data().stayId());
+        } catch (DataIntegrityViolationException e) {
+            logger.warn("Idempotencia activada (restricción BD): Violación de unicidad para stayId {}. Ignorando evento concurrente.", event.data().stayId());
         }
     }
 }
