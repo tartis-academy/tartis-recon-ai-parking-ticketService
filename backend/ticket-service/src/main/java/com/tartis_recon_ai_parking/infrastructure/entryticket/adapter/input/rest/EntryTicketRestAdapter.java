@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
+import com.tartis_recon_ai_parking.application.entryticket.usecase.UpdateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.EntryTicketNotFoundException;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest.dto.request.EntryTicketRequest;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest.dto.response.EntryTicketResponse;
@@ -29,13 +30,15 @@ public class EntryTicketRestAdapter {
     //ATRIBUTOS CORRESPONDIENTES A LOS CASOS DE USO DEL TICKET DE ENTRADA
     private final CreateEntryTicketUseCase createUseCase;
     private final GetEntryTicketUseCase getUseCase;
+    private final UpdateEntryTicketUseCase updateUseCase;
     private final EntryTicketRestMapper mapper;
 
     public EntryTicketRestAdapter(EntryTicketRestMapper mapper, CreateEntryTicketUseCase createEntryTicketUseCase,
-            GetEntryTicketUseCase getEntryTicketUseCase) {
+            GetEntryTicketUseCase getEntryTicketUseCase, UpdateEntryTicketUseCase updateUseCase) {
         // Inicializar los casos de uso del ticket de entrada
         this.createUseCase = createEntryTicketUseCase;
         this.getUseCase = getEntryTicketUseCase;
+        this.updateUseCase = updateUseCase;
         this.mapper = mapper;
     }
 
@@ -73,8 +76,7 @@ public class EntryTicketRestAdapter {
     public ResponseEntity<EntryTicketResponse> updateEntryTicket(@PathVariable UUID id,
                 @Valid @RequestBody EntryTicketRequest request) throws EntryTicketNotFoundException {
                                                             
-        //EntryTicketDTO updatedEntryTicket = updateEntryTicketUseCase.execute(id, mapper.toCreateDTO(request));
-        //return ResponseEntity.ok(mapper.toResponse(updatedEntryTicket));
-        return null; // MÉTODO POR IMPLEMENTAR
+        EntryTicketDTO updatedEntryTicket = updateUseCase.execute(id, mapper.toCreateDTO(request));
+        return ResponseEntity.ok(mapper.toResponse(updatedEntryTicket));
     }
 }

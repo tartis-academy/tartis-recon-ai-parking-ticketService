@@ -7,6 +7,6 @@ import java.util.UUID;
 import java.util.Optional;
 
 public interface TicketRepository extends JpaRepository<TicketEntity, UUID> {
-     @Lock(LockModeType.PESSIMISTIC_WRITE)
-     Optional<TicketEntity> findById(UUID id);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<TicketEntity> findById(UUID id);
 }

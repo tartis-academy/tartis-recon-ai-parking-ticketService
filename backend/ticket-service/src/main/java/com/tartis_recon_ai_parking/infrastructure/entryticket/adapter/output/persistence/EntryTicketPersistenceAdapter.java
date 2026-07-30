@@ -25,7 +25,7 @@ public class EntryTicketPersistenceAdapter implements EntryTicketPersistence {
     @Override
     public EntryTicket save(EntryTicket entryTicket) {
         EntryTicketEntity entity = mapper.toEntity(entryTicket);
-        EntryTicketEntity saved = repository.save(entity);
+        EntryTicketEntity saved = repository.saveAndFlush(entity);
         return mapper.toDomain(saved);
     }
 
