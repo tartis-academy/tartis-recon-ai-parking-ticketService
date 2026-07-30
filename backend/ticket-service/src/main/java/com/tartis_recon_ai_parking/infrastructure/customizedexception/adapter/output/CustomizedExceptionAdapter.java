@@ -23,6 +23,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.QueryTimeoutException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import java.util.stream.Collectors;
 
 // Punto unico de traduccion de excepciones a HTTP (IN-36), alineado con el schema ErrorResponse de openapi.yml
@@ -118,6 +120,30 @@ public class CustomizedExceptionAdapter {
         log.error("Database exception while processing request [{} {}]", request.getMethod(), request.getRequestURI(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,
                 "An unexpected database error occurred. The request could not be processed.", request);
+    }
+
+    /**
+     * HTTP 401 Unauthorized: El token de autenticación está ausente, es inválido o ha caducado.
+     * <p>
+     * Diagnóstico para el equipo: El problema reside en la forma en que el frontend envía el token de autenticación.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(AuthenticationException ex, HttpServletRequest request) {
+        log.warn("Autenticación fallida o token inválido en [{} {}]", request.getMethod(), request.getRequestURI());
+        return buildResponse(HttpStatus.UNAUTHORIZED,
+                "Authentication token is missing, invalid, or expired.", request);
+    }
+
+    /**
+     * HTTP 403 Forbidden: El token de autenticación es válido pero el usuario no posee el rol necesario.
+     * <p>
+     * Diagnóstico para el equipo: El problema reside en los roles configurados asignados a la identidad.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Acceso denegado en [{} {}]", request.getMethod(), request.getRequestURI());
+        return buildResponse(HttpStatus.FORBIDDEN,
+                "You do not have permission to perform this action.", request);
     }
 
     // Formatea un error de validación de un campo u objeto a un texto entendible.
