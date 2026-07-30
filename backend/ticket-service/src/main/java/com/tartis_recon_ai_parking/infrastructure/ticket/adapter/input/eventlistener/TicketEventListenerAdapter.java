@@ -37,7 +37,19 @@ public class TicketEventListenerAdapter {
         } catch (TicketAlreadyExistsException e) {
             logger.warn("Idempotencia activada (comprobación previa): El ticket para stayId {} ya existe. Ignorando evento duplicado.", event.data().stayId());
         } catch (DataIntegrityViolationException e) {
-            logger.warn("Idempotencia activada (restricción BD): Violación de unicidad para stayId {}. Ignorando evento concurrente.", event.data().stayId());
+            if (isStayIdUniqueConstraintViolation(e)) {
+                logger.warn("Idempotencia activada (restricción BD): Violación de unicidad para stayId {}. Ignorando evento concurrente.", event.data().stayId());
+            } else {
+                logger.error("Error de integridad de datos no relacionado con idempotencia de stayId para stayId {}: {}", event.data().stayId(), e.getMessage(), e);
+                throw e;
+            }
         }
+    }
+
+    private boolean isStayIdUniqueConstraintViolation(DataIntegrityViolationException e) {
+        String causeMessage = e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : "";
+        String fullMessage = e.getMessage() != null ? e.getMessage() : "";
+        String combined = (causeMessage + " " + fullMessage).toLowerCase();
+        return combined.contains("uk_stay_id") || combined.contains("stay_id");
     }
 }
