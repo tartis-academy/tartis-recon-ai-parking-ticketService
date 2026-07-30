@@ -22,4 +22,12 @@ public class GetTicketUseCase {
     public List<TicketDTO> getAll() {
         return TicketDTOFactory.toDTOList(persistence.findAll());
     }
+
+    public TicketPageDTO getPage(String search, int page, int size) {
+        TicketPersistence.TicketPage result = persistence.findPage(search, page, size);
+        List<TicketDTO> content = TicketDTOFactory.toDTOList(result.content());
+        return new TicketPageDTO(content, result.page(), result.size(), result.totalElements(), result.totalPages());
+    }
+
+    public record TicketPageDTO(List<TicketDTO> content, int page, int size, long totalElements, int totalPages) {}
 }

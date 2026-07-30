@@ -3,13 +3,18 @@ package com.tartis_recon_ai_parking.infrastructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+import org.springframework.context.annotation.Profile;
+
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
+@Profile("!dev")
 public class SecurityConfig {
 
     @Bean

@@ -3,6 +3,7 @@ package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest;
 import java.util.List;
 import java.util.UUID;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,7 @@ public class TicketRestAdapter {
      * POST /v1/tickets
      */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERARIO')")
     public ResponseEntity<TicketResponse> createTicket(@Valid @RequestBody TicketRequest request) {
         TicketDTO savedTicket = createUseCase.execute(mapper.toCreateDTO(request));
         return new ResponseEntity<>(mapper.toResponse(savedTicket), HttpStatus.CREATED);
@@ -49,12 +51,17 @@ public class TicketRestAdapter {
      * GET /v1/tickets
      */
     @GetMapping
-    public ResponseEntity<List<TicketResponse>> listTickets(@RequestParam(required = false) UUID stayId) {
-        List<TicketDTO> tickets = getTicketUseCase.getAll();
-        return ResponseEntity.ok(mapper.toResponseList(tickets));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<GetTicketUseCase.TicketPageDTO> listTickets(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        GetTicketUseCase.TicketPageDTO result = getTicketUseCase.getPage(search, page, size);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'OPERARIO')")
     public ResponseEntity<TicketResponse> getById(@PathVariable UUID id) {
         TicketDTO ticket = getTicketUseCase.getById(id);
         return ResponseEntity.ok(mapper.toResponse(ticket));

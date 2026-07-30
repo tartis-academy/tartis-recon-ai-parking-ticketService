@@ -2,6 +2,7 @@ package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +25,7 @@ class TicketRequestTest {
     @Test
     void shouldCreateWithAllArgsConstructor() {
         UUID stayId = UUID.randomUUID();
-        TicketRequest request = new TicketRequest(stayId);
+        TicketRequest request = new TicketRequest(stayId, BigDecimal.ZERO);
         assertThat(request.getStayId()).isEqualTo(stayId);
     }
 

@@ -113,14 +113,6 @@ public class CustomizedExceptionAdapter {
                 "An unexpected database error occurred. The request could not be processed.", request);
     }
 
-    // Red de seguridad genérica para cualquier otra excepción no controlada en la aplicación (HTTP 500).
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
-        log.error("Unhandled exception while processing request [{} {}]", request.getMethod(), request.getRequestURI(), ex);
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred. Please try again later.", request);
-    }
-
     // Formatea un error de validación de un campo u objeto a un texto entendible.
     private String formatValidationError(ObjectError error) {
         if (error instanceof FieldError fieldError) {
