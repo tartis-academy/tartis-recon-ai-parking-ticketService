@@ -7,6 +7,13 @@ import java.util.UUID;
 import java.util.Optional;
 
 public interface TicketRepository extends JpaRepository<TicketEntity, UUID> {
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<TicketEntity> findById(UUID id);
+
+    @org.springframework.data.jpa.repository.Query("SELECT t FROM TicketEntity t WHERE " +
+          "(:search IS NULL OR CAST(t.uniqueId AS string) LIKE %:search% OR CAST(t.stayId AS string) LIKE %:search%)")
+    org.springframework.data.domain.Page<TicketEntity> findByFilters(
+           @org.springframework.data.repository.query.Param("search") String search,
+           org.springframework.data.domain.Pageable pageable);
 }

@@ -1,6 +1,7 @@
 package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto.request;
 
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,4 +18,6 @@ public class TicketRequest {
 
     @NotNull(message = "El stayId no puede ser nulo")
     private UUID stayId;
+
+    private BigDecimal totalAmount;
 }
