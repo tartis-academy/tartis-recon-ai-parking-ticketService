@@ -4,8 +4,6 @@ import com.tartis_recon_ai_parking.domain.ticket.Ticket;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
-
 public interface TicketPersistence {
     Ticket save(Ticket ticket);
 
@@ -13,5 +11,7 @@ public interface TicketPersistence {
 
     List<Ticket> findAll();
 
-    Page<Ticket> findAllPaginated(int page, int size);
+    TicketPage findPage(String search, int page, int size);
+
+    record TicketPage(List<Ticket> content, int page, int size, long totalElements, int totalPages) {}
 }

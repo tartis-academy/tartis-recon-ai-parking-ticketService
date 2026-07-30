@@ -69,14 +69,15 @@ class TicketRestAdapterMvcTest {
     @Test
     @DisplayName("GET /v1/tickets deberia devolver 200 con la lista de tickets")
     void listTickets_shouldReturn200() throws Exception {
-        when(getTicketUseCase.getAll()).thenReturn(List.of());
+        when(getTicketUseCase.getPage(any(), anyInt(), anyInt()))
+                .thenReturn(new GetTicketUseCase.TicketPageDTO(List.of(), 0, 20, 0, 0));
 
         mockMvc.perform(get("/v1/tickets")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.content").isArray());
 
-        verify(getTicketUseCase, times(1)).getAll();
+        verify(getTicketUseCase, times(1)).getPage(any(), anyInt(), anyInt());
     }
 
     @Test
@@ -140,7 +141,7 @@ class TicketRestAdapterMvcTest {
         mockMvc.perform(get("/v1/tickets"))
                 .andExpect(status().isUnauthorized());
 
-        verify(getTicketUseCase, never()).getAll();
+        verify(getTicketUseCase, never()).getPage(any(), anyInt(), anyInt());
     }
 
     // =========================================================================
@@ -171,7 +172,7 @@ class TicketRestAdapterMvcTest {
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_OPERARIO"))))
                 .andExpect(status().isForbidden());
 
-        verify(getTicketUseCase, never()).getAll();
+        verify(getTicketUseCase, never()).getPage(any(), anyInt(), anyInt());
     }
 
     @Test
@@ -212,7 +213,7 @@ class TicketRestAdapterMvcTest {
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER"))))
                 .andExpect(status().isForbidden());
 
-        verify(getTicketUseCase, never()).getAll();
+        verify(getTicketUseCase, never()).getPage(any(), anyInt(), anyInt());
     }
 
     @Test

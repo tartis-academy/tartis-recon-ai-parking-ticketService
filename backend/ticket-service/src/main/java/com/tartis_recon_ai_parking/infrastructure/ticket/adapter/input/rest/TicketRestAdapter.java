@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.data.domain.Page;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,12 +52,12 @@ public class TicketRestAdapter {
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<TicketResponse>> listTickets(
-            @RequestParam(required = false) UUID stayId,
+    public ResponseEntity<GetTicketUseCase.TicketPageDTO> listTickets(
+            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Page<TicketDTO> tickets = getTicketUseCase.getAllPaginated(page, size);
-        return ResponseEntity.ok(tickets.map(mapper::toResponse));
+        GetTicketUseCase.TicketPageDTO result = getTicketUseCase.getPage(search, page, size);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")

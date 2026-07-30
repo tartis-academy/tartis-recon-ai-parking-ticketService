@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 @Component
 public class TicketPersistenceAdapter implements TicketPersistence {
@@ -42,8 +40,16 @@ public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersist
     }
 
     @Override
-    public Page<Ticket> findAllPaginated(int page, int size) {
-        return ticketRepository.findAll(PageRequest.of(page, size))
-                .map(ticketPersistenceMapper::toDomain);
+    public TicketPage findPage(String search, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "issuedAt"));
+        
+        org.springframework.data.domain.Page<TicketEntity> result = ticketRepository.findByFilters(search, pageable);
+
+        List<Ticket> content = result.getContent().stream()
+                .map(ticketPersistenceMapper::toDomain)
+                .toList();
+
+        return new TicketPage(content, result.getNumber(), result.getSize(),
+                result.getTotalElements(), result.getTotalPages());
     }
 }
