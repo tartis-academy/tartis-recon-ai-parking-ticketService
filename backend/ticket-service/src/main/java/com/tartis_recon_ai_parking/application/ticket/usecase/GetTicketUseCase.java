@@ -2,6 +2,7 @@ package com.tartis_recon_ai_parking.application.ticket.usecase;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
 
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketDTO;
 import com.tartis_recon_ai_parking.application.ticket.factory.TicketDTOFactory;
@@ -21,5 +22,9 @@ public class GetTicketUseCase {
 
     public List<TicketDTO> getAll() {
         return TicketDTOFactory.toDTOList(persistence.findAll());
+    }
+
+    public Page<TicketDTO> getAllPaginated(int page, int size) {
+        return persistence.findAllPaginated(page, size).map(TicketDTOFactory::toDTO);
     }
 }

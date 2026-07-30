@@ -13,12 +13,10 @@ import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.rest.dto.
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TicketRestMapper {
 
-    // TicketRequest solo trae stayId (el contrato aun no transporta el importe
-    // calculado por stay-service): issuedAt se fija a "ahora" y totalAmount
-    // queda en 0 como placeholder, igual que el resto del calculo de tarifa
-    // real esta stubbeado en el flujo de checkout.
+    // TicketRequest trae stayId y opcionalmente totalAmount (si es síncrono).
     default TicketCreateDTO toCreateDTO(TicketRequest request) {
-        return new TicketCreateDTO(request.getStayId(), Instant.now(), BigDecimal.ZERO);
+        BigDecimal amount = request.getTotalAmount() != null ? request.getTotalAmount() : BigDecimal.ZERO;
+        return new TicketCreateDTO(request.getStayId(), Instant.now(), amount);
     }
 
     TicketResponse toResponse(TicketDTO ticket);

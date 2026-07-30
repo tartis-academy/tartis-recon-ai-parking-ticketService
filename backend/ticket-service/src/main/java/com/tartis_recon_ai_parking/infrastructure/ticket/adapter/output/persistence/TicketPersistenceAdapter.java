@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 @Component
 public class TicketPersistenceAdapter implements TicketPersistence {
@@ -37,5 +39,11 @@ public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersist
         return ticketRepository.findAll().stream()
                 .map(ticketPersistenceMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Page<Ticket> findAllPaginated(int page, int size) {
+        return ticketRepository.findAll(PageRequest.of(page, size))
+                .map(ticketPersistenceMapper::toDomain);
     }
 }
