@@ -38,4 +38,18 @@ public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersist
                 .map(ticketPersistenceMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public TicketPage findPage(String search, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "issuedAt"));
+        
+        org.springframework.data.domain.Page<TicketEntity> result = ticketRepository.findByFilters(search, pageable);
+
+        List<Ticket> content = result.getContent().stream()
+                .map(ticketPersistenceMapper::toDomain)
+                .toList();
+
+        return new TicketPage(content, result.getNumber(), result.getSize(),
+                result.getTotalElements(), result.getTotalPages());
+    }
 }
