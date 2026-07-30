@@ -51,4 +51,9 @@ public class EntryTicketPersistenceAdapter implements EntryTicketPersistence {
                 .map(mapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public Optional<EntryTicket> findByIdForUpdate(UUID id) {
+        return repository.findByIdForUpdate(id).map(mapper::toDomain);
+    }
 }

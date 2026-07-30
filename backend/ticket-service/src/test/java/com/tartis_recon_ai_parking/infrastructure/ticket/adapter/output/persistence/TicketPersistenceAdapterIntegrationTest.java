@@ -72,7 +72,7 @@ class TicketPersistenceAdapterIntegrationTest {
         // Thread A: locks the row and holds it
         Future<Void> threadA = executor.submit(() -> {
             transactionTemplate.execute(status -> {
-                Optional<Ticket> found = adapter.findById(ticketId);
+                Optional<Ticket> found = adapter.findByIdForUpdate(ticketId);
                 assertThat(found).isPresent();
                 lockAcquiredLatch.countDown();
                 try {
@@ -90,7 +90,7 @@ class TicketPersistenceAdapterIntegrationTest {
             lockAcquiredLatch.await();
             long startTime = System.currentTimeMillis();
             return transactionTemplate.execute(status -> {
-                Optional<Ticket> found = adapter.findById(ticketId);
+                Optional<Ticket> found = adapter.findByIdForUpdate(ticketId);
                 long duration = System.currentTimeMillis() - startTime;
                 assertThat(found).isPresent();
                 return duration;
@@ -119,7 +119,7 @@ class TicketPersistenceAdapterIntegrationTest {
         // Thread A: locks the row and holds it
         Future<Void> threadA = executor.submit(() -> {
             transactionTemplate.execute(status -> {
-                Optional<Ticket> found = adapter.findById(ticketId);
+                Optional<Ticket> found = adapter.findByIdForUpdate(ticketId);
                 assertThat(found).isPresent();
                 lockAcquiredLatch.countDown();
                 try {
@@ -138,7 +138,7 @@ class TicketPersistenceAdapterIntegrationTest {
             try {
                 transactionTemplate.execute(status -> {
                     entityManager.createNativeQuery("SET LOCAL lock_timeout = '200ms'").executeUpdate();
-                    adapter.findById(ticketId);
+                    adapter.findByIdForUpdate(ticketId);
                     return null;
                 });
                 return null;
@@ -159,3 +159,4 @@ class TicketPersistenceAdapterIntegrationTest {
             );
     }
 }
+

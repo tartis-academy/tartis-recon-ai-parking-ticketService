@@ -19,7 +19,7 @@ public class UpdateEntryTicketUseCase {
 
     @Transactional
     public EntryTicketDTO execute(UUID id, EntryTicketCreateDTO dto) {
-        EntryTicket existing = entryTicketPersistence.findById(id)
+        EntryTicket existing = entryTicketPersistence.findByIdForUpdate(id)
                 .orElseThrow(() -> new EntryTicketNotFoundException("EntryTicket not found: " + id));
 
         EntryTicket updated = EntryTicket.recreate(

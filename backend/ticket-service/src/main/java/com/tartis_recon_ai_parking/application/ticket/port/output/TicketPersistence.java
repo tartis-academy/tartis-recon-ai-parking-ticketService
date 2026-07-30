@@ -9,6 +9,8 @@ public interface TicketPersistence {
 
     Optional<Ticket> findById(UUID id);
 
+    Optional<Ticket> findByIdForUpdate(UUID id);
+
     List<Ticket> findAll();
 
     TicketPage findPage(String search, int page, int size);

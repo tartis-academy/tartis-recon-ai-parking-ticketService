@@ -48,12 +48,12 @@ class UpdateEntryTicketUseCaseTest {
         EntryTicket existing = EntryTicket.recreate(ticketId, oldStayId, issuedAt, code);
         EntryTicketCreateDTO updateDTO = new EntryTicketCreateDTO(newStayId);
 
-        when(entryTicketPersistence.findById(ticketId)).thenReturn(Optional.of(existing));
+        when(entryTicketPersistence.findByIdForUpdate(ticketId)).thenReturn(Optional.of(existing));
         when(entryTicketPersistence.save(any(EntryTicket.class))).thenAnswer(i -> i.getArgument(0));
 
         EntryTicketDTO result = updateEntryTicketUseCase.execute(ticketId, updateDTO);
 
-        verify(entryTicketPersistence, times(1)).findById(ticketId);
+        verify(entryTicketPersistence, times(1)).findByIdForUpdate(ticketId);
         verify(entryTicketPersistence, times(1)).save(ticketCaptor.capture());
 
         EntryTicket capturedTicket = ticketCaptor.getValue();
@@ -74,13 +74,13 @@ class UpdateEntryTicketUseCaseTest {
         UUID ticketId = UUID.randomUUID();
         EntryTicketCreateDTO updateDTO = new EntryTicketCreateDTO(UUID.randomUUID());
 
-        when(entryTicketPersistence.findById(ticketId)).thenReturn(Optional.empty());
+        when(entryTicketPersistence.findByIdForUpdate(ticketId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> updateEntryTicketUseCase.execute(ticketId, updateDTO))
                 .isInstanceOf(EntryTicketNotFoundException.class)
                 .hasMessageContaining("EntryTicket not found: " + ticketId);
 
-        verify(entryTicketPersistence, times(1)).findById(ticketId);
+        verify(entryTicketPersistence, times(1)).findByIdForUpdate(ticketId);
         verify(entryTicketPersistence, never()).save(any());
     }
 }

@@ -115,7 +115,7 @@ class EntryTicketPersistenceAdapterTest {
         // Thread A: locks the row and holds it
         Future<Void> threadA = executor.submit(() -> {
             transactionTemplate.execute(status -> {
-                Optional<EntryTicket> found = adapter.findById(ticketId);
+                Optional<EntryTicket> found = adapter.findByIdForUpdate(ticketId);
                 assertThat(found).isPresent();
                 lockAcquiredLatch.countDown();
                 try {
@@ -133,7 +133,7 @@ class EntryTicketPersistenceAdapterTest {
             lockAcquiredLatch.await();
             long startTime = System.currentTimeMillis();
             return transactionTemplate.execute(status -> {
-                Optional<EntryTicket> found = adapter.findById(ticketId);
+                Optional<EntryTicket> found = adapter.findByIdForUpdate(ticketId);
                 long duration = System.currentTimeMillis() - startTime;
                 assertThat(found).isPresent();
                 return duration;
@@ -162,7 +162,7 @@ class EntryTicketPersistenceAdapterTest {
         // Thread A: locks the row and holds it
         Future<Void> threadA = executor.submit(() -> {
             transactionTemplate.execute(status -> {
-                Optional<EntryTicket> found = adapter.findById(ticketId);
+                Optional<EntryTicket> found = adapter.findByIdForUpdate(ticketId);
                 assertThat(found).isPresent();
                 lockAcquiredLatch.countDown();
                 try {
@@ -181,7 +181,7 @@ class EntryTicketPersistenceAdapterTest {
             try {
                 transactionTemplate.execute(status -> {
                     entityManager.createNativeQuery("SET LOCAL lock_timeout = '200ms'").executeUpdate();
-                    adapter.findById(ticketId);
+                    adapter.findByIdForUpdate(ticketId);
                     return null;
                 });
                 return null;

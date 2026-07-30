@@ -12,4 +12,7 @@ public interface EntryTicketPersistence {
     Optional<EntryTicket> findByCode(String code);   // ← lectura del codigo de barras en la salida
     Optional<EntryTicket> findByStayId(UUID stayId);
     List<EntryTicket> findAll();
+
+    /** Lectura con bloqueo pesimista — solo para caminos que mutan la fila. */
+    Optional<EntryTicket> findByIdForUpdate(UUID id);
 }

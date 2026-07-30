@@ -35,6 +35,12 @@ public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersist
     }
 
     @Override
+    public Optional<Ticket> findByIdForUpdate(UUID id) {
+        return ticketRepository.findByIdForUpdate(id)
+                .map(entity -> ticketPersistenceMapper.toDomain(entity));
+    }
+
+    @Override
     public List<Ticket> findAll() {
         return ticketRepository.findAll().stream()
                 .map(ticketPersistenceMapper::toDomain)
