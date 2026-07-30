@@ -100,4 +100,18 @@ class TicketEventListenerAdapterTest {
         adapter.handleStayClosedEvent(event);
         verify(createTicketUseCase).execute(any(TicketCreateDTO.class));
     }
+
+    @Test
+    void handleStayClosedEvent_whenTicketAlreadyExistsException_shouldIgnore() throws InvalidTicketException {
+        // Arrange
+        StayClosedEventData data = new StayClosedEventData(UUID.randomUUID(), Instant.now(), BigDecimal.TEN);
+        StayClosedEvent event = new StayClosedEvent(UUID.randomUUID(), "StayClosedEvent", "v1", Instant.now(), data);
+        
+        doThrow(new com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException("Already exists"))
+                .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
+
+        // Act & Assert (Idempotencia: se debe capturar e ignorar sin lanzar excepción hacia afuera)
+        adapter.handleStayClosedEvent(event);
+        verify(createTicketUseCase).execute(any(TicketCreateDTO.class));
+    }
 }
