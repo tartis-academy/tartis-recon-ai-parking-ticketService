@@ -52,9 +52,12 @@ public class TicketRestAdapter {
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<TicketResponse>> listTickets(@RequestParam(required = false) UUID stayId) {
-        List<TicketDTO> tickets = getTicketUseCase.getAll();
-        return ResponseEntity.ok(mapper.toResponseList(tickets));
+    public ResponseEntity<GetTicketUseCase.TicketPageDTO> listTickets(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        GetTicketUseCase.TicketPageDTO result = getTicketUseCase.getPage(search, page, size);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
