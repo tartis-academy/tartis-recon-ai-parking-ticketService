@@ -6,6 +6,7 @@ import com.tartis_recon_ai_parking.application.ticket.factory.TicketDTOFactory;
 import com.tartis_recon_ai_parking.application.ticket.port.output.TicketPersistence;
 import com.tartis_recon_ai_parking.domain.ticket.Ticket;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
+import com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -59,6 +62,9 @@ class CreateTicketUseCaseTest {
     @Test
     void execute_deberiaCrearTicketYRetornarDTO_cuandoElCreateDTOEsValido() throws InvalidTicketException {
         // given
+        UUID stayId = UUID.randomUUID();
+        when(createDTO.stayId()).thenReturn(stayId);
+        when(ticketPersistence.existsByStayId(stayId)).thenReturn(false);
         factoryMock.when(() -> TicketDTOFactory.toDomain(createDTO)).thenReturn(ticketDomain);
         when(ticketPersistence.save(ticketDomain)).thenReturn(savedTicket);
         factoryMock.when(() -> TicketDTOFactory.toDTO(savedTicket)).thenReturn(expectedDTO);
@@ -77,6 +83,9 @@ class CreateTicketUseCaseTest {
     @Test
     void execute_deberiaPropagarInvalidTicketException_cuandoLaFactoryLanzaExcepcion() {
         // given
+        UUID stayId = UUID.randomUUID();
+        when(createDTO.stayId()).thenReturn(stayId);
+        when(ticketPersistence.existsByStayId(stayId)).thenReturn(false);
         factoryMock.when(() -> TicketDTOFactory.toDomain(createDTO))
                 .thenThrow(new InvalidTicketException("Datos de ticket inválidos"));
 
@@ -88,10 +97,42 @@ class CreateTicketUseCaseTest {
     @Test
     void execute_deberiaPropagarExcepcion_cuandoFallaLaPersistencia() {
         // given
+        UUID stayId = UUID.randomUUID();
+        when(createDTO.stayId()).thenReturn(stayId);
+        when(ticketPersistence.existsByStayId(stayId)).thenReturn(false);
         factoryMock.when(() -> TicketDTOFactory.toDomain(createDTO)).thenReturn(ticketDomain);
         when(ticketPersistence.save(ticketDomain)).thenThrow(new RuntimeException("Error de base de datos"));
 
         // when / then
         assertThrows(RuntimeException.class, () -> useCase.execute(createDTO));
+    }
+
+    @Test
+    void execute_deberiaLanzarTicketAlreadyExistsException_cuandoElStayIdYaExiste() {
+        // given
+        UUID stayId = UUID.randomUUID();
+        when(createDTO.stayId()).thenReturn(stayId);
+        when(ticketPersistence.existsByStayId(stayId)).thenReturn(true);
+
+        // when / then (Idempotencia en negocio)
+        assertThrows(TicketAlreadyExistsException.class, () -> useCase.execute(createDTO));
+        verify(ticketPersistence, never()).save(any());
+    }
+
+    @Test
+    void execute_deberiaNoConsultarExistsByStayId_cuandoStayIdEsNull() throws InvalidTicketException {
+        // given
+        when(createDTO.stayId()).thenReturn(null);
+        factoryMock.when(() -> TicketDTOFactory.toDomain(createDTO)).thenReturn(ticketDomain);
+        when(ticketPersistence.save(ticketDomain)).thenReturn(savedTicket);
+        factoryMock.when(() -> TicketDTOFactory.toDTO(savedTicket)).thenReturn(expectedDTO);
+
+        // when
+        TicketDTO result = useCase.execute(createDTO);
+
+        // then
+        assertNotNull(result);
+        verify(ticketPersistence, never()).existsByStayId(any());
+        verify(ticketPersistence, times(1)).save(ticketDomain);
     }
 }

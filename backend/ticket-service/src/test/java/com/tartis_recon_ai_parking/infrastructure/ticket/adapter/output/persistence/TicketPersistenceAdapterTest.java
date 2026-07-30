@@ -83,4 +83,14 @@ class TicketPersistenceAdapterTest {
         assertThat(result).isEmpty();
         verify(ticketPersistenceMapper, never()).toDomain(any());
     }
+
+    @Test
+    void existsByStayId_ShouldDelegateToRepository() {
+        when(ticketRepository.existsByStayId(stayId)).thenReturn(true);
+
+        boolean exists = adapter.existsByStayId(stayId);
+
+        assertThat(exists).isTrue();
+        verify(ticketRepository).existsByStayId(stayId);
+    }
 }

@@ -87,16 +87,44 @@ class TicketEventListenerAdapterTest {
     }
 
     @Test
-    void handleStayClosedEvent_whenDataIntegrityViolationException_shouldIgnore() throws InvalidTicketException {
+    void handleStayClosedEvent_whenDataIntegrityViolationExceptionForStayId_shouldIgnore() throws InvalidTicketException {
         // Arrange
         StayClosedEventData data = new StayClosedEventData(UUID.randomUUID(), Instant.now(), BigDecimal.TEN);
         StayClosedEvent event = new StayClosedEvent(UUID.randomUUID(), "StayClosedEvent", "v1", Instant.now(), data);
         
-        doThrow(new DataIntegrityViolationException("Duplicate key"))
+        doThrow(new DataIntegrityViolationException("Duplicate key value violates unique constraint uk_stay_id"))
                 .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
 
         // Act & Assert
-        // Should not throw any exception
+        // Should not throw any exception when it's a stay_id constraint violation
+        adapter.handleStayClosedEvent(event);
+        verify(createTicketUseCase).execute(any(TicketCreateDTO.class));
+    }
+
+    @Test
+    void handleStayClosedEvent_whenOtherDataIntegrityViolationException_shouldRethrow() throws InvalidTicketException {
+        // Arrange
+        StayClosedEventData data = new StayClosedEventData(UUID.randomUUID(), Instant.now(), BigDecimal.TEN);
+        StayClosedEvent event = new StayClosedEvent(UUID.randomUUID(), "StayClosedEvent", "v1", Instant.now(), data);
+        
+        doThrow(new DataIntegrityViolationException("NOT NULL constraint violation on column total_amount"))
+                .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
+
+        // Act & Assert
+        // Should rethrow DataIntegrityViolationException for unhandled DB integrity errors
+        assertThrows(DataIntegrityViolationException.class, () -> adapter.handleStayClosedEvent(event));
+    }
+
+    @Test
+    void handleStayClosedEvent_whenTicketAlreadyExistsException_shouldIgnore() throws InvalidTicketException {
+        // Arrange
+        StayClosedEventData data = new StayClosedEventData(UUID.randomUUID(), Instant.now(), BigDecimal.TEN);
+        StayClosedEvent event = new StayClosedEvent(UUID.randomUUID(), "StayClosedEvent", "v1", Instant.now(), data);
+        
+        doThrow(new com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException("Already exists"))
+                .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
+
+        // Act & Assert (Idempotencia: se debe capturar e ignorar sin lanzar excepción hacia afuera)
         adapter.handleStayClosedEvent(event);
         verify(createTicketUseCase).execute(any(TicketCreateDTO.class));
     }
