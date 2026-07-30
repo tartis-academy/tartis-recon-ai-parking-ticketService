@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,12 +46,14 @@ public class EntryTicketRestAdapter {
     //#####################################################################################################
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Iterable<EntryTicketResponse>> getAllEntryTickets() {
         Iterable<EntryTicketDTO> entryTikets = getUseCase.getAll();
         return ResponseEntity.ok(mapper.toResponseList(entryTikets));
     }
 
     @GetMapping("/{id}/code")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'OPERARIO')")
     public ResponseEntity<EntryTicketResponse> getEntryTicketById(@PathVariable UUID id) throws EntryTicketNotFoundException {
         EntryTicketDTO entryTicket = getUseCase.execute(id);
         return ResponseEntity.ok(mapper.toResponse(entryTicket));
@@ -58,6 +61,7 @@ public class EntryTicketRestAdapter {
 
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERARIO')")
     public ResponseEntity<EntryTicketResponse> createEntryTicket(@Valid @RequestBody EntryTicketRequest request) {
         EntryTicketDTO savedEntryTicket = createUseCase.execute(mapper.toCreateDTO(request));
         return new ResponseEntity<>(mapper.toResponse(savedEntryTicket), HttpStatus.CREATED);
@@ -65,6 +69,7 @@ public class EntryTicketRestAdapter {
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EntryTicketResponse> updateEntryTicket(@PathVariable UUID id,
                 @Valid @RequestBody EntryTicketRequest request) throws EntryTicketNotFoundException {
                                                             

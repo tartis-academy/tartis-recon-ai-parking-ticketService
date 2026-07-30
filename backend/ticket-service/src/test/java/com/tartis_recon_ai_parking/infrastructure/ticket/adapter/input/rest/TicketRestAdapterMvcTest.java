@@ -11,15 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,7 +42,7 @@ class TicketRestAdapterMvcTest {
     private GetTicketUseCase getTicketUseCase;
 
     @Test
-    @DisplayName("POST /v1/tickets debería devolver 201 con el ticket creado")
+    @DisplayName("POST /v1/tickets deberia devolver 201 con el ticket creado")
     void createTicket_shouldReturn201() throws Exception {
         UUID ticketId = UUID.randomUUID();
         UUID stayId = UUID.randomUUID();
@@ -56,7 +58,7 @@ class TicketRestAdapterMvcTest {
         when(createUseCase.execute(any())).thenReturn(savedDto);
 
         mockMvc.perform(post("/v1/tickets")
-                        .with(jwt())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stayId\":\"" + stayId + "\"}"))
                 .andExpect(status().isCreated())
@@ -65,23 +67,35 @@ class TicketRestAdapterMvcTest {
     }
 
     @Test
-    @DisplayName("GET /v1/tickets/{id} debería devolver 200 cuando existe")
+    @DisplayName("GET /v1/tickets deberia devolver 200 con la lista de tickets")
+    void listTickets_shouldReturn200() throws Exception {
+        when(getTicketUseCase.getAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/v1/tickets")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(getTicketUseCase, times(1)).getAll();
+    }
+
+    @Test
+    @DisplayName("GET /v1/tickets/{id} deberia devolver 200 cuando existe")
     void getById_shouldReturn200WhenExists() throws Exception {
         UUID ticketId = UUID.randomUUID();
         UUID stayId = UUID.randomUUID();
-        Instant issuedAt = Instant.now();
 
         TicketDTO dto = TicketDTO.builder()
                 .uniqueId(ticketId)
                 .stayId(stayId)
-                .issuedAt(issuedAt)
+                .issuedAt(Instant.now())
                 .totalAmount(BigDecimal.valueOf(25.50))
                 .build();
 
         when(getTicketUseCase.getById(ticketId)).thenReturn(dto);
 
         mockMvc.perform(get("/v1/tickets/{id}", ticketId)
-                        .with(jwt()))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.uniqueId").value(ticketId.toString()))
                 .andExpect(jsonPath("$.stayId").value(stayId.toString()))
@@ -89,33 +103,128 @@ class TicketRestAdapterMvcTest {
     }
 
     @Test
-    @DisplayName("GET /v1/tickets/{id} debería devolver 404 cuando no existe")
+    @DisplayName("GET /v1/tickets/{id} deberia devolver 404 cuando no existe")
     void getById_shouldReturn404WhenNotFound() throws Exception {
         UUID ticketId = UUID.randomUUID();
         when(getTicketUseCase.getById(ticketId))
                 .thenThrow(new TicketNotFoundException("No existe un ticket con id " + ticketId));
 
         mockMvc.perform(get("/v1/tickets/{id}", ticketId)
-                        .with(jwt()))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @DisplayName("POST /v1/tickets debería devolver 400 con body vacío")
+    @DisplayName("POST /v1/tickets deberia devolver 400 con body vacio")
     void createTicket_shouldReturn400WithEmptyBody() throws Exception {
         mockMvc.perform(post("/v1/tickets")
-                        .with(jwt())
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("GET /v1/tickets/{id} debería devolver 400 con id inválido")
+    @DisplayName("GET /v1/tickets/{id} deberia devolver 400 con id invalido")
     void getById_shouldReturn400WithInvalidUuid() throws Exception {
         mockMvc.perform(get("/v1/tickets/{id}", "not-a-uuid")
-                        .with(jwt()))
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isBadRequest());
     }
-}
 
+    // --- SEC-04: verificacion del resource server ---
+
+    @Test
+    @DisplayName("Debe rechazar con 401 una peticion sin token")
+    void shouldReturn401WhenNoTokenProvided() throws Exception {
+        mockMvc.perform(get("/v1/tickets"))
+                .andExpect(status().isUnauthorized());
+
+        verify(getTicketUseCase, never()).getAll();
+    }
+
+    // =========================================================================
+    // SEC-10: pruebas de autorizacion fina para el rol OPERARIO
+    // Matriz SEC-03:  TK-01 ✅  TK-02 ❌  TK-03 ✅
+    // =========================================================================
+
+    @Test
+    @DisplayName("OPERARIO: Debe permitir crear un ticket de salida (201)")
+    void shouldAllowCreateTicketForOperario() throws Exception {
+        UUID ticketId = UUID.randomUUID();
+        UUID stayId = UUID.randomUUID();
+        when(createUseCase.execute(any())).thenReturn(TicketDTO.builder()
+                .uniqueId(ticketId).stayId(stayId)
+                .issuedAt(Instant.now()).totalAmount(BigDecimal.ZERO).build());
+
+        mockMvc.perform(post("/v1/tickets")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_OPERARIO")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"stayId\":\"" + stayId + "\"}"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("OPERARIO: Debe denegar la consulta de todos los tickets (403)")
+    void shouldDenyListTicketsForOperario() throws Exception {
+        mockMvc.perform(get("/v1/tickets")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_OPERARIO"))))
+                .andExpect(status().isForbidden());
+
+        verify(getTicketUseCase, never()).getAll();
+    }
+
+    @Test
+    @DisplayName("OPERARIO: Debe permitir consultar un ticket por id (200)")
+    void shouldAllowGetByIdForOperario() throws Exception {
+        UUID ticketId = UUID.randomUUID();
+        when(getTicketUseCase.getById(ticketId)).thenReturn(TicketDTO.builder()
+                .uniqueId(ticketId).stayId(UUID.randomUUID())
+                .issuedAt(Instant.now()).totalAmount(BigDecimal.ZERO).build());
+
+        mockMvc.perform(get("/v1/tickets/{id}", ticketId)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_OPERARIO"))))
+                .andExpect(status().isOk());
+    }
+
+    // =========================================================================
+    // SEC-10: pruebas de autorizacion fina para el rol USER
+    // Matriz SEC-03:  TK-01 ❌  TK-02 ❌  TK-03 ✅
+    // =========================================================================
+
+    @Test
+    @DisplayName("USER: Debe denegar la creacion de un ticket de salida (403)")
+    void shouldDenyCreateTicketForUser() throws Exception {
+        UUID stayId = UUID.randomUUID();
+        mockMvc.perform(post("/v1/tickets")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"stayId\":\"" + stayId + "\"}"))
+                .andExpect(status().isForbidden());
+
+        verify(createUseCase, never()).execute(any());
+    }
+
+    @Test
+    @DisplayName("USER: Debe denegar la consulta de todos los tickets (403)")
+    void shouldDenyListTicketsForUser() throws Exception {
+        mockMvc.perform(get("/v1/tickets")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isForbidden());
+
+        verify(getTicketUseCase, never()).getAll();
+    }
+
+    @Test
+    @DisplayName("USER: Debe permitir consultar un ticket por id (200)")
+    void shouldAllowGetByIdForUser() throws Exception {
+        UUID ticketId = UUID.randomUUID();
+        when(getTicketUseCase.getById(ticketId)).thenReturn(TicketDTO.builder()
+                .uniqueId(ticketId).stayId(UUID.randomUUID())
+                .issuedAt(Instant.now()).totalAmount(BigDecimal.ZERO).build());
+
+        mockMvc.perform(get("/v1/tickets/{id}", ticketId)
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isOk());
+    }
+}
