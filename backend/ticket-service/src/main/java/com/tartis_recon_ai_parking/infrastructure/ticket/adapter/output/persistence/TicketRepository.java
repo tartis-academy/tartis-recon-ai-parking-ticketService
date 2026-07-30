@@ -23,4 +23,6 @@ public interface TicketRepository extends JpaRepository<TicketEntity, UUID> {
     Page<TicketEntity> findByFilters(
            @Param("search") String search,
            Pageable pageable);
+
+    boolean existsByStayId(UUID stayId);
 }

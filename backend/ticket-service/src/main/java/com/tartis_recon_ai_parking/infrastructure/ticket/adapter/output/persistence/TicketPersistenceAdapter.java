@@ -60,4 +60,9 @@ public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersist
         return new TicketPage(content, result.getNumber(), result.getSize(),
                 result.getTotalElements(), result.getTotalPages());
     }
+
+    @Override
+    public boolean existsByStayId(UUID stayId) {
+        return ticketRepository.existsByStayId(stayId);
+    }
 }

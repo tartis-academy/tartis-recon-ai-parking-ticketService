@@ -15,5 +15,7 @@ public interface TicketPersistence {
 
     TicketPage findPage(String search, int page, int size);
 
+    boolean existsByStayId(UUID stayId);
+
     record TicketPage(List<Ticket> content, int page, int size, long totalElements, int totalPages) {}
 }
