@@ -33,7 +33,7 @@ public class TicketEventListenerAdapter {
         try {
             createTicketUseCase.execute(createDTO);
             logger.info("Ticket created successfully for stayId: {}", event.data().stayId());
-        } catch (DataIntegrityViolationException e) {
+        } catch (com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException | DataIntegrityViolationException e) {
             logger.warn("Ticket already exists for stayId: {}. Ignoring duplicate event (Idempotency).", event.data().stayId());
         }
     }

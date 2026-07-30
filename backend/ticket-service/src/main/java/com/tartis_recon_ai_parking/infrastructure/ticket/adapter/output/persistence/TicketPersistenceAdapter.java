@@ -38,4 +38,9 @@ public TicketPersistenceAdapter(TicketRepository ticketRepository, TicketPersist
                 .map(ticketPersistenceMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public boolean existsByStayId(UUID stayId) {
+        return ticketRepository.existsByStayId(stayId);
+    }
 }

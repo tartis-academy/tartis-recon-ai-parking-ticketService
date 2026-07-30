@@ -11,4 +11,6 @@ public interface TicketPersistence {
     Optional<Ticket> findById(UUID id);
 
     List<Ticket> findAll();
+    
+    boolean existsByStayId(UUID stayId);
 }
