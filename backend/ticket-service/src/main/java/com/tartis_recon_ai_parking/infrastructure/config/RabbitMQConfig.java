@@ -30,7 +30,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue ticketStayClosedQueue() {
-        return new Queue("ticket-service-stay-closed-queue");
+        return org.springframework.amqp.core.QueueBuilder.durable("ticket-service-stay-closed-queue")
+                .withArgument("x-dead-letter-exchange", "ticket-service-stay-closed-dlx")
+                .withArgument("x-dead-letter-routing-key", "ticket-service-stay-closed-dead-letter")
+                .build();
     }
 
     @Bean
@@ -38,5 +41,25 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(ticketStayClosedQueue)
                 .to(parkingEventsExchange)
                 .with("stay-closed-v1");
+    }
+
+    // =========================================================================
+    // DEAD LETTER QUEUE (DLQ) & EXCHANGE (DLX) PARA CONSUMIDOR TICKET SERVICE
+    // =========================================================================
+    @Bean
+    public TopicExchange ticketStayClosedDLX() {
+        return new TopicExchange("ticket-service-stay-closed-dlx");
+    }
+
+    @Bean
+    public Queue ticketStayClosedDLQ() {
+        return org.springframework.amqp.core.QueueBuilder.durable("ticket-service-stay-closed-dlq").build();
+    }
+
+    @Bean
+    public Binding bindingTicketStayClosedDLQ(Queue ticketStayClosedDLQ, TopicExchange ticketStayClosedDLX) {
+        return BindingBuilder.bind(ticketStayClosedDLQ)
+                .to(ticketStayClosedDLX)
+                .with("ticket-service-stay-closed-dead-letter");
     }
 }
