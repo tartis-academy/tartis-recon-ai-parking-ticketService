@@ -3,6 +3,7 @@ package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlis
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketCreateDTO;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
+import com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.StayClosedEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,7 @@ public class TicketEventListenerAdapter {
         try {
             createTicketUseCase.execute(createDTO);
             logger.info("Ticket created successfully for stayId: {}", event.data().stayId());
-        } catch (DataIntegrityViolationException e) {
+        } catch (TicketAlreadyExistsException | DataIntegrityViolationException e) {
             logger.warn("Ticket already exists for stayId: {}. Ignoring duplicate event (Idempotency).", event.data().stayId());
         }
     }

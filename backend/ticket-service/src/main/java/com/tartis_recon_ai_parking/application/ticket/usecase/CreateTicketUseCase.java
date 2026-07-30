@@ -6,6 +6,7 @@ import com.tartis_recon_ai_parking.application.ticket.factory.TicketDTOFactory;
 import com.tartis_recon_ai_parking.application.ticket.port.output.TicketPersistence;
 import com.tartis_recon_ai_parking.domain.ticket.Ticket;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
+import com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException;
 
 public class CreateTicketUseCase {
 
@@ -16,6 +17,9 @@ public class CreateTicketUseCase {
     }
 
     public TicketDTO execute(TicketCreateDTO createDTO) throws InvalidTicketException {
+        if (createDTO.stayId() != null && ticketPersistence.existsByStayId(createDTO.stayId())) {
+            throw new TicketAlreadyExistsException("Ya existe un ticket para el stayId " + createDTO.stayId());
+        }
         Ticket ticket = TicketDTOFactory.toDomain(createDTO);
         return TicketDTOFactory.toDTO(ticketPersistence.save(ticket));
     }
