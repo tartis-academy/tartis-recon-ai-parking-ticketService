@@ -69,5 +69,8 @@ class RabbitMQConfigTest {
         assertEquals("ticket-service-stay-closed-dlq", dlqBinding.getDestination());
         assertEquals("ticket-service-stay-closed-dlx", dlqBinding.getExchange());
         assertEquals("ticket-service-stay-closed-dead-letter", dlqBinding.getRoutingKey());
+
+        org.springframework.amqp.rabbit.core.RabbitTemplate mockTemplate = org.mockito.Mockito.mock(org.springframework.amqp.rabbit.core.RabbitTemplate.class);
+        org.junit.jupiter.api.Assertions.assertNotNull(config.messageRecoverer(mockTemplate));
     }
 }
