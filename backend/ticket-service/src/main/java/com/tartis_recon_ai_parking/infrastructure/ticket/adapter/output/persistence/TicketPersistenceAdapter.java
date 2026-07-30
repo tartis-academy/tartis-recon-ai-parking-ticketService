@@ -3,11 +3,13 @@ package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.output.persist
 import com.tartis_recon_ai_parking.application.ticket.port.output.TicketPersistence;
 import com.tartis_recon_ai_parking.domain.ticket.Ticket;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@Transactional
 public class TicketPersistenceAdapter implements TicketPersistence {
 
     private final TicketRepository ticketRepository;

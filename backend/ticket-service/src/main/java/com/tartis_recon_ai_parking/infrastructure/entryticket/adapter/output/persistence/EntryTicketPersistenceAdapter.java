@@ -3,12 +3,14 @@ package com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.output.pe
 import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTicketPersistence;
 import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@Transactional
 public class EntryTicketPersistenceAdapter implements EntryTicketPersistence {
 
     private final EntryTicketRepository repository;
