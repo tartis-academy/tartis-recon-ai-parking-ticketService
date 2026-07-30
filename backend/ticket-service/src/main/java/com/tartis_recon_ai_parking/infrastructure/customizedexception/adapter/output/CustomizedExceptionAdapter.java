@@ -3,6 +3,7 @@ package com.tartis_recon_ai_parking.infrastructure.customizedexception.adapter.o
 import com.tartis_recon_ai_parking.domain.entryticket.exception.EntryTicketNotFoundException;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.InvalidEntryTicketException;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
+import com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException;
 import com.tartis_recon_ai_parking.domain.ticket.exception.TicketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -40,6 +41,12 @@ public class CustomizedExceptionAdapter {
     @ExceptionHandler(InvalidTicketException.class)
     public ResponseEntity<ErrorResponse> handleInvalidTicket(InvalidTicketException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
+
+    // Maneja el caso cuando un ticket ya existe para la estancia (HTTP 409).
+    @ExceptionHandler(TicketAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleTicketAlreadyExists(TicketAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
     }
 
     // Maneja el caso cuando no se encuentra un ticket de entrada solicitado (HTTP 404).

@@ -8,6 +8,7 @@ import com.tartis_recon_ai_parking.application.ticket.usecase.GetTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTicketPersistence;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
+import com.tartis_recon_ai_parking.application.entryticket.usecase.UpdateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.ticket.port.output.TicketPersistence;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
 
@@ -26,6 +27,11 @@ public class BeanConfiguration {
     @Bean
     GetEntryTicketUseCase getEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence){
         return new GetEntryTicketUseCase(entryTicketPersistence);
+    }
+
+    @Bean
+    UpdateEntryTicketUseCase updateEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence){
+        return new UpdateEntryTicketUseCase(entryTicketPersistence);
     }
 
     @Bean

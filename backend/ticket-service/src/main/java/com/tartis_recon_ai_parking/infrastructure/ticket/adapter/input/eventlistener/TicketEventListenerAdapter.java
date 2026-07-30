@@ -50,6 +50,6 @@ public class TicketEventListenerAdapter {
         String causeMessage = e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : "";
         String fullMessage = e.getMessage() != null ? e.getMessage() : "";
         String combined = (causeMessage + " " + fullMessage).toLowerCase();
-        return combined.contains("uk_stay_id") || combined.contains("stay_id");
+        return combined.contains("uk_stay_id");
     }
 }
