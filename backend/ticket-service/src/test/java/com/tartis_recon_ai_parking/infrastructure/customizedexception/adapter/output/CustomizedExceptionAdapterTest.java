@@ -266,4 +266,40 @@ class CustomizedExceptionAdapterTest {
         assertEquals("An unexpected database error occurred. The request could not be processed.", response.getBody().getMessage());
         assertFalse(response.getBody().getMessage().contains("SQL syntax error"));
     }
+
+    @Test
+    @DisplayName("Debe manejar AuthenticationException devolviendo 401 Unauthorized")
+    void shouldHandleUnauthorizedException() {
+        org.springframework.security.authentication.BadCredentialsException exception =
+                new org.springframework.security.authentication.BadCredentialsException("Invalid token");
+
+        ResponseEntity<ErrorResponse> response =
+                exceptionAdapter.handleUnauthorized(exception, requestTo("/v1/tickets"));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getBody().getStatus());
+        assertEquals("UNAUTHORIZED", response.getBody().getError());
+        assertEquals("Authentication token is missing, invalid, or expired.", response.getBody().getMessage());
+        assertEquals("/v1/tickets", response.getBody().getPath());
+    }
+
+    @Test
+    @DisplayName("Debe manejar AccessDeniedException devolviendo 403 Forbidden")
+    void shouldHandleAccessDeniedException() {
+        org.springframework.security.access.AccessDeniedException exception =
+                new org.springframework.security.access.AccessDeniedException("Access is denied");
+
+        ResponseEntity<ErrorResponse> response =
+                exceptionAdapter.handleAccessDenied(exception, requestTo("/v1/tickets"));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.FORBIDDEN.value(), response.getBody().getStatus());
+        assertEquals("FORBIDDEN", response.getBody().getError());
+        assertEquals("You do not have permission to perform this action.", response.getBody().getMessage());
+        assertEquals("/v1/tickets", response.getBody().getPath());
+    }
 }

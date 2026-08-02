@@ -11,6 +11,9 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.context.annotation.Profile;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -18,7 +21,8 @@ import org.springframework.context.annotation.Profile;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http,
+                                    @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -26,7 +30,11 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+            .exceptionHandling(eh -> eh
+                .accessDeniedHandler((request, response, ex) -> resolver.resolveException(request, response, null, ex))
+                .authenticationEntryPoint((request, response, ex) -> resolver.resolveException(request, response, null, ex))
+            );
         return http.build();
     }
 
