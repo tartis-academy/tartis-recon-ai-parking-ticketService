@@ -136,12 +136,32 @@ class TicketRestAdapterMvcTest {
     // --- SEC-04: verificacion del resource server ---
 
     @Test
-    @DisplayName("Debe rechazar con 401 una peticion sin token")
+    @DisplayName("Debe rechazar con 401 GET /v1/tickets sin token")
     void shouldReturn401WhenNoTokenProvided() throws Exception {
         mockMvc.perform(get("/v1/tickets"))
                 .andExpect(status().isUnauthorized());
 
         verify(getTicketUseCase, never()).getPage(any(), anyInt(), anyInt());
+    }
+
+    @Test
+    @DisplayName("Debe rechazar con 401 POST /v1/tickets sin token")
+    void shouldReturn401OnCreateTicketWithoutToken() throws Exception {
+        mockMvc.perform(post("/v1/tickets")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"stayId\":\"" + UUID.randomUUID() + "\"}"))
+                .andExpect(status().isUnauthorized());
+
+        verify(createUseCase, never()).execute(any());
+    }
+
+    @Test
+    @DisplayName("Debe rechazar con 401 GET /v1/tickets/{id} sin token")
+    void shouldReturn401OnGetTicketByIdWithoutToken() throws Exception {
+        mockMvc.perform(get("/v1/tickets/{id}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+
+        verify(getTicketUseCase, never()).getById(any());
     }
 
     // =========================================================================
