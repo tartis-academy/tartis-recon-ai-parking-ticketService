@@ -2,6 +2,7 @@ package com.tartis_recon_ai_parking.infrastructure.config;
 
 import com.tartis_recon_ai_parking.application.entryticket.usecase.*;
 import com.tartis_recon_ai_parking.application.ticket.usecase.*;
+import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.TicketEventListenerAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.flyway.enabled=false",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8180/realms/parking"
+        "spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8180/realms/parking",
+        "spring.rabbitmq.listener.simple.auto-startup=false"
 })
 class SecurityConfigExceptionHandlingTest {
 
@@ -53,6 +55,9 @@ class SecurityConfigExceptionHandlingTest {
     @MockitoBean private GetEntryTicketUseCase getEntryTicketUseCase;
     @MockitoBean private UpdateEntryTicketUseCase updateEntryTicketUseCase;
     @MockitoBean private JwtDecoder jwtDecoder;
+
+    @MockitoBean
+    private TicketEventListenerAdapter ticketEventListenerAdapter;
 
     @BeforeEach
     void setUp() {
