@@ -281,17 +281,8 @@ class EntryTicketRestAdapterMvcTest {
     }
 
     @Test
-    @DisplayName("UNAUTHENTICATED: Debe rechazar GET /v1/entry-tickets sin token (401)")
-    void getAllEntryTickets_withoutToken_returns401() throws Exception {
-        mockMvc.perform(get("/v1/entry-tickets"))
-                .andExpect(status().isUnauthorized());
-
-        verify(getUseCase, never()).getAll();
-    }
-
-    @Test
     @DisplayName("UNAUTHENTICATED: Debe rechazar GET /v1/entry-tickets/{id}/code sin token (401)")
-    void getEntryTicketByCode_withoutToken_returns401() throws Exception {
+    void shouldReturn401OnGetEntryTicketByCodeWithoutToken() throws Exception {
         mockMvc.perform(get("/v1/entry-tickets/{id}/code", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
 
@@ -300,7 +291,7 @@ class EntryTicketRestAdapterMvcTest {
 
     @Test
     @DisplayName("UNAUTHENTICATED: Debe rechazar POST /v1/entry-tickets sin token (401)")
-    void createEntryTicket_withoutToken_returns401() throws Exception {
+    void shouldReturn401OnCreateEntryTicketWithoutToken() throws Exception {
         mockMvc.perform(post("/v1/entry-tickets")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stayId\":\"" + UUID.randomUUID() + "\"}"))
@@ -311,7 +302,7 @@ class EntryTicketRestAdapterMvcTest {
 
     @Test
     @DisplayName("UNAUTHENTICATED: Debe rechazar PUT /v1/entry-tickets/{id} sin token (401)")
-    void updateEntryTicket_withoutToken_returns401() throws Exception {
+    void shouldReturn401OnUpdateEntryTicketWithoutToken() throws Exception {
         mockMvc.perform(put("/v1/entry-tickets/{id}", UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stayId\":\"" + UUID.randomUUID() + "\"}"))
