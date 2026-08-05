@@ -166,7 +166,7 @@ class TicketRestAdapterMvcTest {
 
     // =========================================================================
     // SEC-10: pruebas de autorizacion fina para el rol OPERARIO
-    // Matriz SEC-03:  TK-01 ❌  TK-02 ✅  TK-03 ✅
+    // Matriz SEC-03:  TK-01 ✅  TK-02 ❌  TK-03 ✅
     // =========================================================================
 
     @Test
