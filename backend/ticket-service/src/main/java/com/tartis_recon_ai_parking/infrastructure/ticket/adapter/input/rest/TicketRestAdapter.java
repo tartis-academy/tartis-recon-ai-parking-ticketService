@@ -39,8 +39,12 @@ public class TicketRestAdapter {
      * Genera el ticket de salida/pago para una estancia finalizada.
      * POST /v1/tickets
      */
+    // Solo ADMIN. La emision ordinaria del ticket de salida NO pasa por aqui:
+    // la dispara ticket-service al consumir StayClosedEvent, asi que cerrar
+    // este endpoint a OPERARIO no toca el flujo de check-out. Queda como
+    // emision manual, que es una operacion de administracion.
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'OPERARIO')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TicketResponse> createTicket(@Valid @RequestBody TicketRequest request) {
         TicketDTO savedTicket = createUseCase.execute(mapper.toCreateDTO(request));
         return new ResponseEntity<>(mapper.toResponse(savedTicket), HttpStatus.CREATED);
@@ -50,8 +54,10 @@ public class TicketRestAdapter {
      * Lista los tickets, opcionalmente filtrados por stayId.
      * GET /v1/tickets
      */
+    // OPERARIO entra en modo consulta: ve el listado pero no puede emitir
+    // tickets (POST, arriba, exige ADMIN).
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERARIO')")
     public ResponseEntity<GetTicketUseCase.TicketPageDTO> listTickets(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
