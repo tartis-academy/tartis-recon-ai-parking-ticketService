@@ -166,33 +166,37 @@ class TicketRestAdapterMvcTest {
 
     // =========================================================================
     // SEC-10: pruebas de autorizacion fina para el rol OPERARIO
-    // Matriz SEC-03:  TK-01 ✅  TK-02 ❌  TK-03 ✅
+    // OPERARIO queda en modo consulta sobre tickets: TK-01 ❌  TK-02 ✅  TK-03 ✅
+    // (se aparta de la matriz SEC-03 original, que era justo la inversa; el
+    // panel de administracion necesita que OPERARIO LEA el listado y no pueda
+    // emitir tickets a mano).
     // =========================================================================
 
     @Test
-    @DisplayName("OPERARIO: Debe permitir crear un ticket de salida (201)")
-    void shouldAllowCreateTicketForOperario() throws Exception {
-        UUID ticketId = UUID.randomUUID();
+    @DisplayName("OPERARIO: Debe denegar la creacion de un ticket de salida (403)")
+    void shouldDenyCreateTicketForOperario() throws Exception {
         UUID stayId = UUID.randomUUID();
-        when(createUseCase.execute(any())).thenReturn(TicketDTO.builder()
-                .uniqueId(ticketId).stayId(stayId)
-                .issuedAt(Instant.now()).totalAmount(BigDecimal.ZERO).build());
 
         mockMvc.perform(post("/v1/tickets")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_OPERARIO")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stayId\":\"" + stayId + "\"}"))
-                .andExpect(status().isCreated());
+                .andExpect(status().isForbidden());
+
+        verify(createUseCase, never()).execute(any());
     }
 
     @Test
-    @DisplayName("OPERARIO: Debe denegar la consulta de todos los tickets (403)")
-    void shouldDenyListTicketsForOperario() throws Exception {
+    @DisplayName("OPERARIO: Debe permitir la consulta de todos los tickets (200)")
+    void shouldAllowListTicketsForOperario() throws Exception {
+        when(getTicketUseCase.getPage(any(), anyInt(), anyInt()))
+                .thenReturn(new GetTicketUseCase.TicketPageDTO(List.of(), 0, 20, 0, 0));
+
         mockMvc.perform(get("/v1/tickets")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_OPERARIO"))))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
 
-        verify(getTicketUseCase, never()).getPage(any(), anyInt(), anyInt());
+        verify(getTicketUseCase).getPage(any(), anyInt(), anyInt());
     }
 
     @Test
