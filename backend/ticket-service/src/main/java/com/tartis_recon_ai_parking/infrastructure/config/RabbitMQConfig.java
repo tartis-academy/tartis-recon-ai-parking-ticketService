@@ -73,4 +73,17 @@ public class RabbitMQConfig {
     public MessageRecoverer messageRecoverer(RabbitTemplate rabbitTemplate) {
         return new RepublishMessageRecoverer(rabbitTemplate, DLX_EXCHANGE, DLQ_ROUTING_KEY);
     }
+
+    /**
+     * Activa mandatory y engancha el callback de mensajes devueltos, para que un
+     * evento publicado sin ninguna cola que lo recoja deje una linea de ERROR en
+     * vez de desaparecer. Ver {@link UnroutableEventLogger}.
+     */
+    @Bean
+    public UnroutableEventLogger unroutableEventLogger(RabbitTemplate rabbitTemplate) {
+        UnroutableEventLogger callback = new UnroutableEventLogger();
+        rabbitTemplate.setMandatory(true);
+        rabbitTemplate.setReturnsCallback(callback);
+        return callback;
+    }
 }
