@@ -10,11 +10,15 @@ import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
+
+    public static final String EXCHANGE_NAME = "parking-events-exchange";
+    public static final String ROUTING_KEY_TICKET_CHANGED = "ticket-changed-v1";
 
     public static final String STAY_CLOSED_QUEUE = "ticket-service-stay-closed-queue";
     public static final String DLX_EXCHANGE = "ticket-service-stay-closed-dlx";
@@ -28,7 +32,7 @@ public class RabbitMQConfig {
 
     @Bean
     public TopicExchange parkingEventsExchange() {
-        return new TopicExchange("parking-events-exchange");
+        return new TopicExchange(EXCHANGE_NAME);
     }
 
     @Bean
@@ -69,5 +73,23 @@ public class RabbitMQConfig {
     @Bean
     public MessageRecoverer messageRecoverer(RabbitTemplate rabbitTemplate) {
         return new RepublishMessageRecoverer(rabbitTemplate, DLX_EXCHANGE, DLQ_ROUTING_KEY);
+    }
+
+    @Bean
+    public UnroutableEventLogger unroutableEventLogger() {
+        return new UnroutableEventLogger();
+    }
+
+    /**
+     * Engancha el callback de mensajes devueltos al RabbitTemplate autoconfigurado.
+     *
+     * <p>Las otras dos piezas viven en application.properties, que es donde alguien
+     * las va a buscar: {@code spring.rabbitmq.template.mandatory} y
+     * {@code spring.rabbitmq.publisher-returns}. Sin esta ultima el callback no se
+     * ejecuta aunque este registrado aqui. Ver {@link UnroutableEventLogger}.
+     */
+    @Bean
+    public RabbitTemplateCustomizer returnsCallbackCustomizer(UnroutableEventLogger unroutableEventLogger) {
+        return rabbitTemplate -> rabbitTemplate.setReturnsCallback(unroutableEventLogger);
     }
 }

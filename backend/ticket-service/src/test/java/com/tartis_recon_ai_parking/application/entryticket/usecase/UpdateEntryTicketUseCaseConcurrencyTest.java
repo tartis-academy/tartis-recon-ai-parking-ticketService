@@ -2,6 +2,7 @@ package com.tartis_recon_ai_parking.application.entryticket.usecase;
 
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
 import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTicketPersistence;
+import com.tartis_recon_ai_parking.application.ticket.port.output.TicketEventPublisher;
 import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.output.persistence.EntryTicketEntity;
 import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.output.persistence.EntryTicketPersistenceAdapter;
@@ -16,6 +17,7 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
@@ -57,6 +59,9 @@ class UpdateEntryTicketUseCaseConcurrencyTest {
 
     @MockitoSpyBean
     private EntryTicketPersistence adapter;
+
+    @MockitoBean
+    private TicketEventPublisher ticketEventPublisher;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
