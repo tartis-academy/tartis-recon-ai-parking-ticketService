@@ -155,7 +155,7 @@ class TicketEventListenerAdapterTest {
         TicketCreateDTO capturedDto = captor.getValue();
         assertEquals(stayId, capturedDto.stayId());
         assertEquals(issuedAt, capturedDto.issuedAt());
-        assertNull(capturedDto.totalAmount());
+        assertEquals(BigDecimal.ZERO, capturedDto.totalAmount());
     }
 
     @Test

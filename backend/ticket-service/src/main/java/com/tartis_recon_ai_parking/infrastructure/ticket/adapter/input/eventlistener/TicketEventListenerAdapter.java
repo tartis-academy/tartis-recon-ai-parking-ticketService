@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Component
@@ -56,7 +57,7 @@ public class TicketEventListenerAdapter {
         TicketCreateDTO createDTO = new TicketCreateDTO(
                 event.stayId(),
                 event.issuedAt(),
-                null // Al ser un ticket de entrada offline, el monto total aún no se ha cobrado o calculado
+                BigDecimal.ZERO // Al ser un ticket de entrada offline, el monto total aún no se ha cobrado o calculado
         );
 
         try {
