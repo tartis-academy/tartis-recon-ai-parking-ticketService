@@ -20,6 +20,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * activado el broker devuelve al publicador todo mensaje que no haya podido
  * enrutar y este callback lo registra como ERROR.
  *
+ * <p><b>Requiere ademas {@code spring.rabbitmq.publisher-returns=true}.</b> Sin
+ * esa propiedad el CachingConnectionFactory no envuelve los canales en
+ * PublisherCallbackChannel, RabbitTemplate.addListener() no registra nada y el
+ * basic.return del broker se descarta en el cliente: este callback no llega a
+ * ejecutarse nunca. Ambas propiedades estan en application.properties.
+ *
  * <p>La cola y el binding se declaran SIEMPRE en el servicio que consume, nunca
  * aqui: declararlos en el publicador es lo que provoco el PRECONDITION_FAILED
  * de ASY-08.

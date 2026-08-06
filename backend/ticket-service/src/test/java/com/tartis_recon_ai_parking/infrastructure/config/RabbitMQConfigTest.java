@@ -79,19 +79,18 @@ class RabbitMQConfigTest {
     }
 
     /**
-     * Sin mandatory, un evento publicado con una routing key que ningun binding
-     * recoge lo descarta RabbitMQ en silencio: ni cola que crezca, ni DLQ, ni
-     * log. Hoy es justo el caso de ticket-changed-v1, que todavia no tiene
-     * consumidor, asi que esta es la unica forma de que se note.
+     * Solo comprueba el cableado del callback. Que el callback llegue a
+     * ejecutarse depende ademas de dos propiedades, que se cubren en
+     * {@link RabbitPublisherReturnsPropertiesTest}.
      */
     @Test
-    void debeActivarMandatoryYEngancharElCallbackDeMensajesDevueltos() {
+    void debeEngancharElCallbackDeMensajesDevueltosAlTemplate() {
         RabbitTemplate mockTemplate = mock(RabbitTemplate.class);
+        UnroutableEventLogger callback = config.unroutableEventLogger();
 
-        UnroutableEventLogger callback = config.unroutableEventLogger(mockTemplate);
+        config.returnsCallbackCustomizer(callback).customize(mockTemplate);
 
         assertNotNull(callback);
-        verify(mockTemplate).setMandatory(true);
         verify(mockTemplate).setReturnsCallback(callback);
     }
 }

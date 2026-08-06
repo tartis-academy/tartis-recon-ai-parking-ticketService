@@ -10,6 +10,7 @@ import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -74,16 +75,21 @@ public class RabbitMQConfig {
         return new RepublishMessageRecoverer(rabbitTemplate, DLX_EXCHANGE, DLQ_ROUTING_KEY);
     }
 
+    @Bean
+    public UnroutableEventLogger unroutableEventLogger() {
+        return new UnroutableEventLogger();
+    }
+
     /**
-     * Activa mandatory y engancha el callback de mensajes devueltos, para que un
-     * evento publicado sin ninguna cola que lo recoja deje una linea de ERROR en
-     * vez de desaparecer. Ver {@link UnroutableEventLogger}.
+     * Engancha el callback de mensajes devueltos al RabbitTemplate autoconfigurado.
+     *
+     * <p>Las otras dos piezas viven en application.properties, que es donde alguien
+     * las va a buscar: {@code spring.rabbitmq.template.mandatory} y
+     * {@code spring.rabbitmq.publisher-returns}. Sin esta ultima el callback no se
+     * ejecuta aunque este registrado aqui. Ver {@link UnroutableEventLogger}.
      */
     @Bean
-    public UnroutableEventLogger unroutableEventLogger(RabbitTemplate rabbitTemplate) {
-        UnroutableEventLogger callback = new UnroutableEventLogger();
-        rabbitTemplate.setMandatory(true);
-        rabbitTemplate.setReturnsCallback(callback);
-        return callback;
+    public RabbitTemplateCustomizer returnsCallbackCustomizer(UnroutableEventLogger unroutableEventLogger) {
+        return rabbitTemplate -> rabbitTemplate.setReturnsCallback(unroutableEventLogger);
     }
 }
