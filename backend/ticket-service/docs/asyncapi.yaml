@@ -1,0 +1,40 @@
+asyncapi: '2.6.0'
+info:
+  title: Ticket Service Async API
+  version: '1.0.0'
+  description: Eventos consumidos y emitidos por el microservicio de tickets.
+
+channels:
+  entry-ticket-offline-queue:
+    subscribe:
+      summary: Reconciliación de ticket de entrada offline emitido en barrera.
+      message:
+        $ref: '#/components/messages/EntryTicketOfflineEvent'
+
+components:
+  messages:
+    EntryTicketOfflineEvent:
+      name: EntryTicketOfflineEvent
+      title: Evento Ticket Offline
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          stayId:
+            type: string
+            format: uuid
+            example: "c0a80121-8c43-11ee-be56-0242ac120002"
+          licensePlate:
+            type: string
+            example: "XYZ-9876"
+          offlineCode:
+            type: string
+            example: "OFFLINE-ENTRY-12345"
+          issuedAt:
+            type: string
+            format: date-time
+            example: "2026-08-06T18:00:00Z"
+        required:
+          - stayId
+          - offlineCode
+          - issuedAt

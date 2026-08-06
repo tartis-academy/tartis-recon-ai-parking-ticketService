@@ -14,6 +14,10 @@ import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 @Configuration
 public class RabbitMQConfig {
 
@@ -25,9 +29,22 @@ public class RabbitMQConfig {
     public static final String DLQ_ROUTING_KEY = "ticket-service-stay-closed-dead-letter";
     public static final String DLQ_NAME = "ticket-service-stay-closed-dlq";
 
+    // --- ENTRY TICKET OFFLINE QUEUE (RES-07) ---
+    public static final String ENTRY_TICKET_OFFLINE_QUEUE = "ticket-service-entry-ticket-offline-queue";
+    public static final String ENTRY_TICKET_OFFLINE_ROUTING_KEY = "entry-ticket-offline-v1";
+    public static final String ENTRY_TICKET_OFFLINE_DLX = "ticket-service-entry-ticket-offline-dlx";
+    public static final String ENTRY_TICKET_OFFLINE_DLQ_ROUTING_KEY = "ticket-service-entry-ticket-offline-dead-letter";
+    public static final String ENTRY_TICKET_OFFLINE_DLQ = "ticket-service-entry-ticket-offline-dlq";
+
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        ObjectMapper objectMapper = new ObjectMapper();
+    // Ignora campos extra enviados por los productores sin romper la deserialización
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    // Soporte correcto para tipos java.time (Instant, LocalDateTime)
+    objectMapper.registerModule(new JavaTimeModule());
+    
+    return new Jackson2JsonMessageConverter(objectMapper);
     }
 
     @Bean
@@ -68,6 +85,41 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(ticketStayClosedDLQ)
                 .to(ticketStayClosedDLX)
                 .with(DLQ_ROUTING_KEY);
+    }
+
+    // CONFIGURACIÓN DE COLA ENTRY TICKET OFFLINE (RES-07)
+    // =========================================================================
+
+    @Bean
+    public Queue entryTicketOfflineQueue() {
+        return QueueBuilder.durable(ENTRY_TICKET_OFFLINE_QUEUE)
+                .withArgument("x-dead-letter-exchange", ENTRY_TICKET_OFFLINE_DLX)
+                .withArgument("x-dead-letter-routing-key", ENTRY_TICKET_OFFLINE_DLQ_ROUTING_KEY)
+                .build();
+    }
+
+    @Bean
+    public Binding bindingEntryTicketOfflineQueue(Queue entryTicketOfflineQueue, TopicExchange parkingEventsExchange) {
+        return BindingBuilder.bind(entryTicketOfflineQueue)
+                .to(parkingEventsExchange)
+                .with(ENTRY_TICKET_OFFLINE_ROUTING_KEY);
+    }
+
+    @Bean
+    public TopicExchange entryTicketOfflineDLX() {
+        return new TopicExchange(ENTRY_TICKET_OFFLINE_DLX);
+    }
+
+    @Bean
+    public Queue entryTicketOfflineDLQ() {
+        return QueueBuilder.durable(ENTRY_TICKET_OFFLINE_DLQ).build();
+    }
+
+    @Bean
+    public Binding bindingEntryTicketOfflineDLQ(Queue entryTicketOfflineDLQ, TopicExchange entryTicketOfflineDLX) {
+        return BindingBuilder.bind(entryTicketOfflineDLQ)
+                .to(entryTicketOfflineDLX)
+                .with(ENTRY_TICKET_OFFLINE_DLQ_ROUTING_KEY);
     }
 
     @Bean

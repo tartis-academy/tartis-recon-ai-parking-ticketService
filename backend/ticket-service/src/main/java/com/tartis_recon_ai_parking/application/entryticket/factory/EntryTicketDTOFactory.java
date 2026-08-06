@@ -14,7 +14,12 @@ public final class EntryTicketDTOFactory {
         return new EntryTicketDTO(entry.getUniqueId(), entry.getStayId(), entry.getIssuedAt(), entry.getCode());
     }
     public static EntryTicket toDomain(EntryTicketCreateDTO dto){
-        return EntryTicket.create(dto.stayId());       
+        // Si vienen código y fecha, se usa la factoría de reconciliación offline
+        if (dto.code() != null && !dto.code().isBlank() && dto.issuedAt() != null) {
+            return EntryTicket.createOffline(dto.stayId(), dto.code(), dto.issuedAt());
+        }
+        // Si solo viene stayId, se mantiene el flujo de creación online
+        return EntryTicket.create(dto.stayId());
     }
 
     public static List<EntryTicketDTO> toDTOList(List<EntryTicket> entryTickets) {

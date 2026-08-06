@@ -47,6 +47,12 @@ public class EntryTicket {
         return new EntryTicket(uniqueId, stayId , issuedAt, code);
     }
 
+    // Factoría para reconciliación de tickets de entrada creados offline
+    static public EntryTicket createOffline(UUID stayId, String code, Instant issuedAt) {
+        UUID uniqueId = UUID.randomUUID();
+        return new EntryTicket(uniqueId, stayId, issuedAt, code);
+    }
+
 
     // --- GETTERS Y SETTERS ---
 
