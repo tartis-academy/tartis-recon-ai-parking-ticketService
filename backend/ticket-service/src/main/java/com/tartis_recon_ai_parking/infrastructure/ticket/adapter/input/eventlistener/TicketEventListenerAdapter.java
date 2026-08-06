@@ -1,9 +1,14 @@
 package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener;
 
+import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
+import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketCreateDTO;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
+import com.tartis_recon_ai_parking.domain.entryticket.exception.InvalidEntryTicketException;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
 import com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException;
+import com.tartis_recon_ai_parking.infrastructure.config.RabbitMQConfig;
+import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.EntryTicketOfflineEventDto;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.StayClosedEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -11,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Component
@@ -19,9 +25,12 @@ public class TicketEventListenerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(TicketEventListenerAdapter.class);
 
     private final CreateTicketUseCase createTicketUseCase;
+    private final CreateEntryTicketUseCase createEntryTicketUseCase;
 
-    public TicketEventListenerAdapter(CreateTicketUseCase createTicketUseCase) {
+    public TicketEventListenerAdapter(CreateTicketUseCase createTicketUseCase, 
+                                     CreateEntryTicketUseCase createEntryTicketUseCase) {
         this.createTicketUseCase = createTicketUseCase;
+        this.createEntryTicketUseCase = createEntryTicketUseCase;
     }
 
     @RabbitListener(queues = "ticket-service-stay-closed-queue")
@@ -41,6 +50,33 @@ public class TicketEventListenerAdapter {
                 logger.warn("Idempotencia activada (restricción BD): Violación de unicidad para stayId {}. Ignorando evento concurrente.", event.data().stayId());
             } else {
                 logger.error("Error de integridad de datos no relacionado con idempotencia de stayId para stayId {}: {}", event.data().stayId(), e.getMessage(), e);
+                throw e;
+            }
+        }
+    }
+
+    // Listener para reconciliar el ticket offline emitido cuando ticket-service estuvo caído
+    @RabbitListener(queues = RabbitMQConfig.ENTRY_TICKET_OFFLINE_QUEUE)
+    public void handleEntryTicketOfflineEvent(EntryTicketOfflineEventDto event) throws InvalidEntryTicketException {
+        logger.info("Recibido evento de ticket de entrada offline para reconciliar. stayId: {}, code: {}", event.stayId(), event.offlineCode());
+
+        //Se mapea al EntryTicketCreateDTO preservando código y fecha originales
+        EntryTicketCreateDTO createDTO = new EntryTicketCreateDTO(
+                event.stayId(),
+                event.offlineCode(),
+                event.issuedAt()
+        );
+
+        try {
+            createEntryTicketUseCase.execute(createDTO);
+            logger.info("EntryTicket offline reconciliado e insertado exitosamente para stayId: {}", event.stayId());
+        } catch (TicketAlreadyExistsException e) {
+            logger.warn("Idempotencia activada (comprobación previa): El EntryTicket offline para stayId {} ya existe. Ignorando evento.", event.stayId());
+        } catch (DataIntegrityViolationException e) {
+            if (isStayIdUniqueConstraintViolation(e)) {
+                logger.warn("Idempotencia activada (restricción BD): Violación de unicidad para stayId {}. Ignorando evento.", event.stayId());
+            } else {
+                logger.error("Error de integridad al procesar EntryTicket offline para stayId {}: {}", event.stayId(), e.getMessage(), e);
                 throw e;
             }
         }

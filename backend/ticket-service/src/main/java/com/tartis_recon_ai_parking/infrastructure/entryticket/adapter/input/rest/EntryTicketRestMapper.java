@@ -11,6 +11,8 @@ import com.tartis_recon_ai_parking.infrastructure.entryticket.adapter.input.rest
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface EntryTicketRestMapper {
 
+    @Mapping(target = "code", ignore = true)
+    @Mapping(target = "issuedAt", ignore = true)
     EntryTicketCreateDTO toCreateDTO(EntryTicketRequest request);
 
     @Mapping(source = "uniqueId", target = "id")
