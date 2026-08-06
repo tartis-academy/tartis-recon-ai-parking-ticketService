@@ -18,8 +18,8 @@ info:
     who calculates it — confirm scope and pricing source with the team
     before implementing PATCH /tickets/{ticketId}/lost.
 
-    Admin endpoints are unauthenticated in Phase 1 (HU-07 / RN-02 out of
-    scope, see bearerAuth scheme below).
+    All operations require a JWT (bearerAuth scheme below). Roles are enforced
+    per method via @PreAuthorize (SEC-10 / SEC-11).
   version: 1.0.0
   contact:
     name: TARTIS Recon-AI - Team Parking
@@ -30,6 +30,12 @@ servers:
 tags:
   - name: tickets
     description: Exit ticket generation and query
+
+# Todas las operaciones requieren token JWT (bearerAuth). Solo el health check
+# de actuator (/actuator/health) es publico y queda fuera de este contrato.
+# SEC-13: securityScheme aplicado a nivel de documento.
+security:
+  - bearerAuth: []
 
 paths:
   /tickets:
