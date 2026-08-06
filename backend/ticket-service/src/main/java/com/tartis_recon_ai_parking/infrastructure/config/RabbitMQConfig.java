@@ -16,6 +16,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
+    public static final String EXCHANGE_NAME = "parking-events-exchange";
+    public static final String ROUTING_KEY_TICKET_CHANGED = "ticket-changed-v1";
+
     public static final String STAY_CLOSED_QUEUE = "ticket-service-stay-closed-queue";
     public static final String DLX_EXCHANGE = "ticket-service-stay-closed-dlx";
     public static final String DLQ_ROUTING_KEY = "ticket-service-stay-closed-dead-letter";

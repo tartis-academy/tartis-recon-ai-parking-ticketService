@@ -1,43 +1,43 @@
 package com.tartis_recon_ai_parking.infrastructure.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.tartis_recon_ai_parking.application.ticket.port.output.TicketPersistence;
-import com.tartis_recon_ai_parking.application.ticket.usecase.GetTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTicketPersistence;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.CreateEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.GetEntryTicketUseCase;
 import com.tartis_recon_ai_parking.application.entryticket.usecase.UpdateEntryTicketUseCase;
+import com.tartis_recon_ai_parking.application.ticket.port.output.TicketEventPublisher;
 import com.tartis_recon_ai_parking.application.ticket.port.output.TicketPersistence;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
+import com.tartis_recon_ai_parking.application.ticket.usecase.GetTicketUseCase;
 
 @Configuration
 public class BeanConfiguration {
-     @Bean
+
+    @Bean
     public GetTicketUseCase getSpotUseCase(TicketPersistence persistence) {
         return new GetTicketUseCase(persistence);
     }
 
     @Bean
-    CreateEntryTicketUseCase createEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence){
-        return new CreateEntryTicketUseCase(entryTicketPersistence);
+    public CreateEntryTicketUseCase createEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence, @Autowired(required = false) TicketEventPublisher ticketEventPublisher) {
+        return new CreateEntryTicketUseCase(entryTicketPersistence, ticketEventPublisher);
     }
 
     @Bean
-    GetEntryTicketUseCase getEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence){
+    public GetEntryTicketUseCase getEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence) {
         return new GetEntryTicketUseCase(entryTicketPersistence);
     }
 
     @Bean
-    UpdateEntryTicketUseCase updateEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence){
-        return new UpdateEntryTicketUseCase(entryTicketPersistence);
+    public UpdateEntryTicketUseCase updateEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence, @Autowired(required = false) TicketEventPublisher ticketEventPublisher) {
+        return new UpdateEntryTicketUseCase(entryTicketPersistence, ticketEventPublisher);
     }
 
     @Bean
-    CreateTicketUseCase createTicketUseCase(TicketPersistence ticketPersistence){
-        return new CreateTicketUseCase(ticketPersistence);
+    public CreateTicketUseCase createTicketUseCase(TicketPersistence ticketPersistence, @Autowired(required = false) TicketEventPublisher ticketEventPublisher) {
+        return new CreateTicketUseCase(ticketPersistence, ticketEventPublisher);
     }
-
 }
-
