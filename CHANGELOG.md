@@ -5,7 +5,7 @@ All notable changes to the `ticket-service` microservice will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - 2026-08-04
+## [1.0.0] - 2026-08-04
 
 ### Added
 - **Consumo Asíncrono de Eventos de Cierre (`StayClosedEvent`):** Implementado `TicketEventListenerAdapter` con `@RabbitListener` escuchando en `ticket-service-stay-closed-queue` para la emisión automática del ticket de salida tras el check-out en `stay-service`.
@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Protección con `@PreAuthorize`:** Control de acceso en controladores REST.
 - **Escaneo Continuo de Vulnerabilidades:** Pipeline CI/CD integrado con Trivy (`docker-scan`).
 
-## [1.0.0] - 2026-07-25
+## [0.5.0] - 2026-07-25
 
 ### Added
 - **MVP Inicial de `ticket-service`:** Implementación inicial de la arquitectura hexagonal para la emisión de tickets de cobro.
@@ -42,5 +42,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Persistencia PostgreSQL:** Configuración JPA con esquema `ticket`.
 - **Contrato OpenAPI:** Especificación en `openapi.yml`.
 
-[2.0.0]: https://github.com/tartis-academy/tartis-recon-ai-parking-ticketService/compare/v1.0.0...v2.0.0
-[1.0.0]: https://github.com/tartis-academy/tartis-recon-ai-parking-ticketService/releases/tag/v1.0.0
+[1.0.0]: https://github.com/tartis-academy/tartis-recon-ai-parking-ticketService/compare/v0.5.0...v1.0.0
+[0.5.0]: https://github.com/tartis-academy/tartis-recon-ai-parking-ticketService/releases/tag/v0.5.0
