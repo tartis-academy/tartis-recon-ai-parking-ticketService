@@ -201,8 +201,12 @@ class CreateTicketUseCaseTest {
 
         when(ticketPersistence.existsByStayId(stayId)).thenReturn(false);
 
-        
+        // Se fuerza la llamada al método real para ejecutar la validación de dominio
+        factoryMock.when(() -> TicketDTOFactory.toDomain(createDTO)).thenCallRealMethod();
+
+        // when / then
         assertThrows(InvalidTicketException.class, () -> useCase.execute(createDTO));
         verify(ticketPersistence, never()).save(any());
+        verify(ticketEventPublisher, never()).publish(any());
     }
 }
