@@ -4,6 +4,7 @@ import com.tartis_recon_ai_parking.application.ticket.dto.TicketCreateDTO;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
 import com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException;
+import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.EntryTicketOfflineEventDto;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.StayClosedEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,32 @@ public class TicketEventListenerAdapter {
                 logger.warn("Idempotencia activada (restricción BD): Violación de unicidad para stayId {}. Ignorando evento concurrente.", event.data().stayId());
             } else {
                 logger.error("Error de integridad de datos no relacionado con idempotencia de stayId para stayId {}: {}", event.data().stayId(), e.getMessage(), e);
+                throw e;
+            }
+        }
+    }
+
+    // Listener para reconciliar el ticket offline emitido cuando ticket-service estuvo caído
+    @RabbitListener(queues = "${rabbitmq.queue.entry-ticket-offline:ticket-service-entry-ticket-offline-queue}")
+    public void handleEntryTicketOfflineEvent(EntryTicketOfflineEventDto event) throws InvalidTicketException {
+        logger.info("Recibido evento de ticket offline para reconciliar. stayId: {}, code: {}", event.stayId(), event.offlineCode());
+
+        TicketCreateDTO createDTO = new TicketCreateDTO(
+                event.stayId(),
+                event.issuedAt(),
+                null // Al ser un ticket de entrada offline, el monto total aún no se ha cobrado o calculado
+        );
+
+        try {
+            createTicketUseCase.execute(createDTO);
+            logger.info("Ticket offline reconciliado e insertado exitosamente para stayId: {}", event.stayId());
+        } catch (TicketAlreadyExistsException e) {
+            logger.warn("Idempotencia activada (comprobación previa): El ticket offline para stayId {} ya existe. Ignorando evento.", event.stayId());
+        } catch (DataIntegrityViolationException e) {
+            if (isStayIdUniqueConstraintViolation(e)) {
+                logger.warn("Idempotencia activada (restricción BD): Violación de unicidad para stayId {}. Ignorando evento.", event.stayId());
+            } else {
+                logger.error("Error de integridad al procesar ticket offline para stayId {}: {}", event.stayId(), e.getMessage(), e);
                 throw e;
             }
         }

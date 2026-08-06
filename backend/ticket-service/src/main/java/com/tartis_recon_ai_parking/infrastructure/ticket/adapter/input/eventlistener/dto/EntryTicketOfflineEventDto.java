@@ -1,0 +1,11 @@
+package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto;
+
+import java.time.Instant;
+import java.util.UUID;
+
+public record EntryTicketOfflineEventDto(
+        UUID stayId,
+        String plate,
+        String offlineCode,
+        Instant issuedAt
+) {}

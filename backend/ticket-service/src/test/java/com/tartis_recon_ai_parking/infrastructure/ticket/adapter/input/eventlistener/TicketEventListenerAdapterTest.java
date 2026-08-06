@@ -3,6 +3,8 @@ package com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlis
 import com.tartis_recon_ai_parking.application.ticket.dto.TicketCreateDTO;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
+import com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException;
+import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.EntryTicketOfflineEventDto;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.StayClosedEvent;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.StayClosedEventData;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -127,5 +130,84 @@ class TicketEventListenerAdapterTest {
         // Act & Assert (Idempotencia: se debe capturar e ignorar sin lanzar excepción hacia afuera)
         adapter.handleStayClosedEvent(event);
         verify(createTicketUseCase).execute(any(TicketCreateDTO.class));
+    }
+
+    // TESTS: handleEntryTicketOfflineEvent
+    @Test
+    void handleEntryTicketOfflineEvent_shouldCallUseCaseWithCorrectData() throws InvalidTicketException {
+        // Arrange
+        UUID stayId = UUID.randomUUID();
+        Instant issuedAt = Instant.now();
+        EntryTicketOfflineEventDto event = new EntryTicketOfflineEventDto(
+                stayId,
+                "XYZ-9876",
+                "OFFLINE-ENTRY-12345",
+                issuedAt
+        );
+
+        // Act
+        adapter.handleEntryTicketOfflineEvent(event);
+
+        // Assert
+        ArgumentCaptor<TicketCreateDTO> captor = ArgumentCaptor.forClass(TicketCreateDTO.class);
+        verify(createTicketUseCase).execute(captor.capture());
+
+        TicketCreateDTO capturedDto = captor.getValue();
+        assertEquals(stayId, capturedDto.stayId());
+        assertEquals(issuedAt, capturedDto.issuedAt());
+        assertNull(capturedDto.totalAmount());
+    }
+
+    @Test
+    void handleEntryTicketOfflineEvent_whenTicketAlreadyExistsException_shouldIgnore() throws InvalidTicketException {
+        // Arrange
+        EntryTicketOfflineEventDto event = new EntryTicketOfflineEventDto(
+                UUID.randomUUID(),
+                "XYZ-9876",
+                "OFFLINE-ENTRY-12345",
+                Instant.now()
+        );
+
+        doThrow(new TicketAlreadyExistsException("Already exists"))
+                .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
+
+        // Act & Assert
+        adapter.handleEntryTicketOfflineEvent(event);
+        verify(createTicketUseCase).execute(any(TicketCreateDTO.class));
+    }
+
+    @Test
+    void handleEntryTicketOfflineEvent_whenDataIntegrityViolationExceptionForStayId_shouldIgnore() throws InvalidTicketException {
+        // Arrange
+        EntryTicketOfflineEventDto event = new EntryTicketOfflineEventDto(
+                UUID.randomUUID(),
+                "XYZ-9876",
+                "OFFLINE-ENTRY-12345",
+                Instant.now()
+        );
+
+        doThrow(new DataIntegrityViolationException("Duplicate key value violates unique constraint uk_stay_id"))
+                .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
+
+        // Act & Assert
+        adapter.handleEntryTicketOfflineEvent(event);
+        verify(createTicketUseCase).execute(any(TicketCreateDTO.class));
+    }
+
+    @Test
+    void handleEntryTicketOfflineEvent_whenOtherDataIntegrityViolationException_shouldRethrow() throws InvalidTicketException {
+        // Arrange
+        EntryTicketOfflineEventDto event = new EntryTicketOfflineEventDto(
+                UUID.randomUUID(),
+                "XYZ-9876",
+                "OFFLINE-ENTRY-12345",
+                Instant.now()
+        );
+
+        doThrow(new DataIntegrityViolationException("NOT NULL constraint violation"))
+                .when(createTicketUseCase).execute(any(TicketCreateDTO.class));
+
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class, () -> adapter.handleEntryTicketOfflineEvent(event));
     }
 }
