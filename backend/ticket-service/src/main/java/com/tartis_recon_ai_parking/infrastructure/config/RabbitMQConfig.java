@@ -31,7 +31,7 @@ public class RabbitMQConfig {
 
     @Bean
     public TopicExchange parkingEventsExchange() {
-        return new TopicExchange("parking-events-exchange");
+        return new TopicExchange(EXCHANGE_NAME);
     }
 
     @Bean

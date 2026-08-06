@@ -2,7 +2,6 @@ package com.tartis_recon_ai_parking.application.entryticket.usecase;
 
 import java.time.Instant;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
@@ -19,16 +18,13 @@ public class UpdateEntryTicketUseCase {
     private final EntryTicketPersistence entryTicketPersistence;
     private final TicketEventPublisher ticketEventPublisher;
 
-    public UpdateEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence) {
-        this(entryTicketPersistence, null);
-    }
-
-    @Autowired
-    public UpdateEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence, @Autowired(required = false) TicketEventPublisher ticketEventPublisher) {
+    public UpdateEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence, TicketEventPublisher ticketEventPublisher) {
         this.entryTicketPersistence = entryTicketPersistence;
         this.ticketEventPublisher = ticketEventPublisher;
     }
 
+    // @Transactional es obligatorio: el relay escucha en AFTER_COMMIT y sin
+    // transaccion activa el evento se descarta sin error ni log.
     @Transactional
     public EntryTicketDTO execute(UUID id, EntryTicketCreateDTO dto) {
         EntryTicket existing = entryTicketPersistence.findByIdForUpdate(id)
@@ -42,11 +38,7 @@ public class UpdateEntryTicketUseCase {
         );
 
         EntryTicket saved = entryTicketPersistence.save(updated);
-
-        if (ticketEventPublisher != null) {
-            ticketEventPublisher.publish(TicketChangedEvent.of(saved, "UPDATED", Instant.now()));
-        }
-
+        ticketEventPublisher.publish(TicketChangedEvent.of(saved, "UPDATED", Instant.now()));
         return EntryTicketDTOFactory.toDTO(saved);
     }
 }

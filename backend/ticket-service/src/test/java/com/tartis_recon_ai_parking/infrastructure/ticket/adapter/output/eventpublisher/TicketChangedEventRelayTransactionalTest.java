@@ -15,6 +15,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -22,7 +24,11 @@ import com.tartis_recon_ai_parking.application.ticket.dto.TicketChangedEvent;
 import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import com.tartis_recon_ai_parking.infrastructure.config.RabbitMQConfig;
 
+// NOT_SUPPORTED desactiva la transaccion que @DataJpaTest abre por test: sin
+// esto el TransactionTemplate se une a ella, nunca commitea y AFTER_COMMIT no
+// dispara (el test de commit falla y el de rollback pasa en falso).
 @DataJpaTest
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({TicketChangedEventRelay.class, TicketEventPublisherAdapter.class})
 class TicketChangedEventRelayTransactionalTest {
 

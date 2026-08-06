@@ -11,8 +11,9 @@ import com.tartis_recon_ai_parking.application.ticket.dto.TicketChangedEvent;
 import com.tartis_recon_ai_parking.infrastructure.config.RabbitMQConfig;
 
 /**
- * Escucha los TicketChangedEvent de aplicacion y los reenvia a RabbitMQ
- * unicamente cuando la transaccion realiza commit exitoso (AFTER_COMMIT).
+ * Los use cases publican TicketChangedEvent como evento de aplicacion dentro de
+ * su @Transactional; este listener lo reenvia a RabbitMQ solo si la transaccion
+ * hace commit, evitando publicar un cambio que finalmente no quedo persistido.
  */
 @Component
 public class TicketChangedEventRelay {
@@ -28,16 +29,16 @@ public class TicketChangedEventRelay {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onTicketChanged(TicketChangedEvent event) {
         try {
-            log.info("Publicando TicketChangedEvent {} a RabbitMQ para ticket {}", event.eventId(), event.data().ticketId());
             rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE_NAME,
                 RabbitMQConfig.ROUTING_KEY_TICKET_CHANGED,
                 event
             );
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            // La transaccion ya commiteo: propagar solo romperia el hilo del
+            // llamante por una publicacion que es best-effort.
             log.error("No se pudo publicar el evento {} de cambio a RabbitMQ para el ticket {}",
                     event.eventId(), event.data().ticketId(), e);
-            throw new RuntimeException("Error al publicar TicketChangedEvent a RabbitMQ", e);
         }
     }
 }

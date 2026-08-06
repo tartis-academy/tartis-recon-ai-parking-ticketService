@@ -1,6 +1,5 @@
 package com.tartis_recon_ai_parking.infrastructure.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,7 +21,7 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public CreateEntryTicketUseCase createEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence, @Autowired(required = false) TicketEventPublisher ticketEventPublisher) {
+    public CreateEntryTicketUseCase createEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence, TicketEventPublisher ticketEventPublisher) {
         return new CreateEntryTicketUseCase(entryTicketPersistence, ticketEventPublisher);
     }
 
@@ -32,12 +31,12 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public UpdateEntryTicketUseCase updateEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence, @Autowired(required = false) TicketEventPublisher ticketEventPublisher) {
+    public UpdateEntryTicketUseCase updateEntryTicketUseCase(EntryTicketPersistence entryTicketPersistence, TicketEventPublisher ticketEventPublisher) {
         return new UpdateEntryTicketUseCase(entryTicketPersistence, ticketEventPublisher);
     }
 
     @Bean
-    public CreateTicketUseCase createTicketUseCase(TicketPersistence ticketPersistence, @Autowired(required = false) TicketEventPublisher ticketEventPublisher) {
+    public CreateTicketUseCase createTicketUseCase(TicketPersistence ticketPersistence, TicketEventPublisher ticketEventPublisher) {
         return new CreateTicketUseCase(ticketPersistence, ticketEventPublisher);
     }
 }
