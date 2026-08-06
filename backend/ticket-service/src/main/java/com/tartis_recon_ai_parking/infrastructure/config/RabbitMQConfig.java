@@ -14,6 +14,10 @@ import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 @Configuration
 public class RabbitMQConfig {
 
@@ -34,7 +38,13 @@ public class RabbitMQConfig {
 
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        ObjectMapper objectMapper = new ObjectMapper();
+    // Ignora campos extra enviados por los productores sin romper la deserialización
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    // Soporte correcto para tipos java.time (Instant, LocalDateTime)
+    objectMapper.registerModule(new JavaTimeModule());
+    
+    return new Jackson2JsonMessageConverter(objectMapper);
     }
 
     @Bean
