@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -190,5 +191,18 @@ class CreateTicketUseCaseTest {
         assertNotNull(result);
         verify(ticketPersistence, never()).existsByStayId(any());
         verify(ticketPersistence, times(1)).save(ticketDomain);
+    }
+
+    @Test
+    void execute_deberiaLanzarInvalidTicketException_cuandoTotalAmountEsNull() {
+        // given: DTO con totalAmount = null (el escenario del bug original)
+        UUID stayId = UUID.randomUUID();
+        TicketCreateDTO createDTO = new TicketCreateDTO(stayId, Instant.now(), null);
+
+        when(ticketPersistence.existsByStayId(stayId)).thenReturn(false);
+
+        
+        assertThrows(InvalidTicketException.class, () -> useCase.execute(createDTO));
+        verify(ticketPersistence, never()).save(any());
     }
 }
