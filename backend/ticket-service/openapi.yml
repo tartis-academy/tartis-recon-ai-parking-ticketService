@@ -1,26 +1,21 @@
 openapi: 3.0.3
 info:
   title: ticket-service API
+  version: 1.1.0
   description: >
-    Generates the exit/payment ticket when stay-service calls it during
-    check-out (POST /v1/tickets). This is the "Ticket" domain entity
-    (IN-20: 1:1 with Stay) — distinct from the EntryTicket issued at
-    check-in, which is generated and owned by stay-service itself, not by
-    this service.
+    Manages the "Ticket" domain entity (IN-20: 1:1 with Stay), the exit /
+    payment ticket generated when stay-service calls during check-out, as
+    well as the "EntryTicket" subdomain (the entry ticket issued at
+    check-in, which stay-service delegates to this service).
 
-    GAP FLAGGED: the mandatory user stories (HU-01..HU-08, per
-    Ejercicio_inicial_en_grupo.docx) do not include a "Gestionar tickets"
-    story. Ticket querying (GET) and the lost-ticket flow below are
-    inferred only from invariants IN-20/IN-21/IN-22 and the edge-case notes
-    in Bocetos_Sesión_1.pdf, not from an explicit HU/RN. In particular,
-    IN-22 ("a Ticket marked lost is always billed at a penalty rate,
-    never the normal tariff") has no RN defining the penalty rate value or
-    who calculates it — confirm scope and pricing source with the team
-    before implementing PATCH /tickets/{ticketId}/lost.
+    No SSE stream is exposed by this service yet: ticket-service does not
+    publish events to the shared exchange today (see the ticket-service
+    ADR), so there is no real-time stream to document here.
 
-    All operations require a JWT (bearerAuth scheme below). Roles are enforced
-    per method via @PreAuthorize (SEC-10 / SEC-11).
-  version: 1.0.0
+    All operations require a JWT (bearerAuth scheme below). Roles are
+    enforced per method via @PreAuthorize (SEC-10 / SEC-11):
+    ADMIN / OPERARIO for creation, ADMIN for listing and update, and
+    USER / ADMIN / OPERARIO for single-ticket reads.
   contact:
     name: TARTIS Recon-AI - Team Parking
 
@@ -30,6 +25,8 @@ servers:
 tags:
   - name: tickets
     description: Exit ticket generation and query
+  - name: entry-tickets
+    description: Entry ticket (issued at check-in) management
 
 # Todas las operaciones requieren token JWT (bearerAuth). Solo el health check
 # de actuator (/actuator/health) es publico y queda fuera de este contrato.
@@ -44,14 +41,13 @@ paths:
       operationId: createTicket
       summary: >
         Generates the exit ticket for a finished stay. Called synchronously
-        by stay-service as part of the check-out sequence (before spot
-        release).
+        by stay-service as part of the check-out sequence.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TicketCreateRequest'
+              $ref: '#/components/schemas/TicketRequest'
       responses:
         '201':
           description: Ticket generated
@@ -76,14 +72,14 @@ paths:
     get:
       tags: [tickets]
       operationId: listTickets
-      summary: Lists tickets, optionally filtered by stay (inferred, see GAP note)
+      summary: Lists tickets, optionally filtered by a search term
       parameters:
-        - name: stayId
+        - name: search
           in: query
           required: false
+          description: Optional free-text search over the ticket fields
           schema:
             type: string
-            format: uuid
         - name: page
           in: query
           required: false
@@ -115,11 +111,11 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /tickets/{ticketId}:
+  /tickets/{id}:
     get:
       tags: [tickets]
       operationId: getTicket
-      summary: Retrieves a ticket by ID (inferred, see GAP note)
+      summary: Retrieves a ticket by ID
       parameters:
         - $ref: '#/components/parameters/TicketIdPath'
       responses:
@@ -138,31 +134,51 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /tickets/{ticketId}/lost:
-    patch:
-      tags: [tickets]
-      operationId: markTicketLost
-      summary: >
-        Marks a ticket as LOST (IN-22). A LOST ticket is never recalculated
-        with the normal tariff; a penalty rate applies instead. Penalty
-        rate source is undefined in current docs (see GAP note above).
-      parameters:
-        - $ref: '#/components/parameters/TicketIdPath'
+  /entry-tickets:
+    get:
+      tags: [entry-tickets]
+      operationId: listEntryTickets
+      summary: Lists all entry tickets (admin)
       responses:
         '200':
-          description: Ticket marked as lost
+          description: List of entry tickets
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TicketResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntryTicketResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [entry-tickets]
+      operationId: createEntryTicket
+      summary: Creates an entry ticket for a stay (issued at check-in)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryTicketRequest'
+      responses:
+        '201':
+          description: Entry ticket created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntryTicketResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '409':
-          description: Ticket is already LOST
+          description: An entry ticket already exists for this stayId
           content:
             application/json:
               schema:
@@ -170,65 +186,73 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /entry-tickets/{id}/code:
+    get:
+      tags: [entry-tickets]
+      operationId: getEntryTicket
+      summary: Retrieves an entry ticket by ID (recovery of its barcode/code)
+      parameters:
+        - $ref: '#/components/parameters/EntryTicketIdPath'
+      responses:
+        '200':
+          description: Entry ticket detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntryTicketResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /entry-tickets/{id}:
+    put:
+      tags: [entry-tickets]
+      operationId: updateEntryTicket
+      summary: Updates an entry ticket (admin)
+      parameters:
+        - $ref: '#/components/parameters/EntryTicketIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryTicketRequest'
+      responses:
+        '200':
+          description: Entry ticket updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntryTicketResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
 components:
   schemas:
 
-    TicketStatus:
-      type: string
-      enum: [VALID, LOST]
-
-    Ticket:
+    TicketRequest:
       type: object
-      properties:
-        ticketId:
-          type: string
-          format: uuid
-        stayId:
-          type: string
-          format: uuid
-          description: 1:1 with Stay (IN-20)
-        plate:
-          type: string
-        checkIn:
-          type: string
-          format: date-time
-        checkOut:
-          type: string
-          format: date-time
-        totalMinutes:
-          type: integer
-        amount:
-          type: number
-          format: double
-        status:
-          $ref: '#/components/schemas/TicketStatus'
-        issuedAt:
-          type: string
-          format: date-time
-
-    TicketCreateRequest:
-      type: object
-      required: [stayId, plate, checkIn, checkOut, totalMinutes, amount]
+      required: [stayId]
       properties:
         stayId:
           type: string
           format: uuid
-        plate:
-          type: string
-        checkIn:
-          type: string
-          format: date-time
-        checkOut:
-          type: string
-          format: date-time
-        totalMinutes:
-          type: integer
-        amount:
+        totalAmount:
           type: number
           format: double
-
-    TicketResponse:
-      $ref: '#/components/schemas/Ticket'
 
     TicketPage:
       type: object
@@ -236,7 +260,7 @@ components:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/Ticket'
+            $ref: '#/components/schemas/TicketResponse'
         page:
           type: integer
         size:
@@ -246,6 +270,47 @@ components:
           format: int64
         totalPages:
           type: integer
+
+    TicketResponse:
+      type: object
+      properties:
+        uniqueId:
+          type: string
+          format: uuid
+        stayId:
+          type: string
+          format: uuid
+          description: 1:1 with Stay (IN-20)
+        issuedAt:
+          type: string
+          format: date-time
+        totalAmount:
+          type: number
+          format: double
+
+    EntryTicketRequest:
+      type: object
+      required: [stayId]
+      properties:
+        stayId:
+          type: string
+          format: uuid
+
+    EntryTicketResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        stayId:
+          type: string
+          format: uuid
+        issuedAt:
+          type: string
+          format: date-time
+        code:
+          type: string
+          description: Barcode of the entry ticket
 
     ErrorResponse:
       type: object
@@ -268,7 +333,14 @@ components:
 
   parameters:
     TicketIdPath:
-      name: ticketId
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    EntryTicketIdPath:
+      name: id
       in: path
       required: true
       schema:
@@ -295,7 +367,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     NotFound:
-      description: Ticket not found
+      description: Resource not found
       content:
         application/json:
           schema:

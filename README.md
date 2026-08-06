@@ -12,8 +12,6 @@
    - Emitidos al finalizar la estancia para registrar el importe total cobrado.
    - Mantiene la relación de dominio **IN-20** (relación 1:1 entre una estancia `stayId` y su `Ticket` final de cobro).
    - Soporta generación síncrona vía REST (`POST /v1/tickets`) y asíncrona mediante el consumo de eventos `StayClosedEvent` desde RabbitMQ.
-   - **Gestión de Tickets Perdidos (IN-22):** Endpoint `PATCH /v1/tickets/{ticketId}/lost` para marcar un ticket como extraviado o perdido.
-   - **Publicación de Eventos:** Emisión del evento `TicketChangedEvent` tras modificaciones o emisión de tickets.
 
 ---
 
@@ -37,7 +35,6 @@ Todos los endpoints requieren autenticación mediante Bearer Access Token (emiti
 | `POST` | `/v1/tickets` | Genera síncronamente un ticket de salida/cobro (relación 1:1 IN-20) | `ADMIN`, `OPERARIO` | `201 Created` (`TicketResponse`) |
 | `GET` | `/v1/tickets` | Listado paginado de tickets de salida | `ADMIN` | `200 OK` (`List<TicketResponse>`) |
 | `GET` | `/v1/tickets/{id}` | Obtiene el detalle de un ticket de salida por su UUID | `USER`, `ADMIN`, `OPERARIO` | `200 OK` (`TicketResponse`) |
-| `PATCH` | `/v1/tickets/{ticketId}/lost` | Marca un ticket de salida como extraviado/perdido (IN-22) | `ADMIN`, `OPERARIO` | `200 OK` (`TicketResponse`) |
 | `GET` | `/actuator/health` | Probes de salud del servicio (Liveness / Readiness) | Público | `200 OK` |
 
 ---
@@ -51,7 +48,6 @@ Todos los endpoints requieren autenticación mediante Bearer Access Token (emiti
 - **`CreateTicketUseCase`:** Crea un ticket de cobro final verificando que no exista uno previo para la misma estancia (IN-20).
 - **`GetTicketByCodeUseCase` / `GetTicketUseCase`:** Búsqueda de tickets de cobro.
 - **`ListTicketsUseCase`:** Recuperación de listados de tickets de salida.
-- **`MarkTicketAsLostUseCase`:** Aplica la marca de ticket extraviado (IN-22).
 
 ### Puertos de Dominio:
 - **Puertos de Entrada:** REST API (`EntryTicketRestAdapter`, `TicketRestAdapter`), AMQP Listener (`TicketEventListenerAdapter`).
