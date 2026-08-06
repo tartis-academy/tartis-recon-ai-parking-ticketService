@@ -4,6 +4,7 @@ import com.tartis_recon_ai_parking.application.ticket.dto.TicketCreateDTO;
 import com.tartis_recon_ai_parking.application.ticket.usecase.CreateTicketUseCase;
 import com.tartis_recon_ai_parking.domain.ticket.exception.InvalidTicketException;
 import com.tartis_recon_ai_parking.domain.ticket.exception.TicketAlreadyExistsException;
+import com.tartis_recon_ai_parking.infrastructure.config.RabbitMQConfig;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.EntryTicketOfflineEventDto;
 import com.tartis_recon_ai_parking.infrastructure.ticket.adapter.input.eventlistener.dto.StayClosedEvent;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -48,7 +49,7 @@ public class TicketEventListenerAdapter {
     }
 
     // Listener para reconciliar el ticket offline emitido cuando ticket-service estuvo caído
-    @RabbitListener(queues = "${rabbitmq.queue.entry-ticket-offline:ticket-service-entry-ticket-offline-queue}")
+    @RabbitListener(queues = RabbitMQConfig.ENTRY_TICKET_OFFLINE_QUEUE)
     public void handleEntryTicketOfflineEvent(EntryTicketOfflineEventDto event) throws InvalidTicketException {
         logger.info("Recibido evento de ticket offline para reconciliar. stayId: {}, code: {}", event.stayId(), event.offlineCode());
 
