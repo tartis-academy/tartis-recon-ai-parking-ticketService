@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Garantía de Idempotencia & Unicidad (IN-20):** Protección contra duplicados mediante comprobación previa (`TicketAlreadyExistsException`) y restricción de unicidad en base de datos (`uk_stay_id`) asegurando la relación 1:1 entre estancia y ticket.
 - **Resiliencia & Dead Letter Queue (DLQ):** Configuración de reintentos exponenciales (6 intentos) y enrutamiento automático a la cola de mensajes muertos `ticket-service-stay-closed-dlq`.
 - **Gestión de Tickets de Entrada (`EntryTicket`):** Dominio y controladores REST (`/v1/entry-tickets`) para la creación, consulta y actualización de tickets de entrada emitidos en la barrera.
-- **Gestión de Tickets Perdidos (IN-22):** Implementado endpoint `PATCH /v1/tickets/{ticketId}/lost` para marcar tickets como extraviados evitando recálculos con tarifa ordinaria.
 - **Integración con Keycloak & Spring Security:** OAuth2 Resource Server para la validación de Bearer Access Tokens emitidos por Keycloak.
 - **Enrutamiento por API Gateway (Kong):** Enrutamiento centralizado y comprobación de seguridad en el perímetro a través de Kong.
 - **Timeout de Bloqueo Pesimista:** Configuración de `lock_timeout = 2000` ms en HikariCP para evitar bloqueos indefinidos en PostgreSQL.

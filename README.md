@@ -12,7 +12,6 @@
    - Emitidos al finalizar la estancia (check-out) para registrar el importe total a cobrar y el resumen del cierre.
    - Mantiene la relación de dominio **IN-20** (relación 1:1 entre una estancia `stayId` y su `Ticket` final de cobro).
    - Soporta generación síncrona vía REST (`POST /v1/tickets`) y asíncrona mediante el consumo de eventos `StayClosedEvent` desde RabbitMQ.
-   - Soporta el marcado de tickets extraviados (**IN-22**: un ticket marcado como `LOST` nunca se recalcula con la tarifa ordinaria sino con el régimen de penalización aplicable).
 
 ## Endpoints expuestos
 
@@ -34,7 +33,6 @@ Todos los endpoints requieren autenticación mediante Bearer Token (Access Token
 | `POST` | `/v1/tickets` | Genera un ticket de salida/cobro (relación 1:1 IN-20 con `stayId`) | `ADMIN`, `OPERARIO` |
 | `GET` | `/v1/tickets` | Listado paginado de tickets de salida (búsqueda por `stayId` o término) | `ADMIN` |
 | `GET` | `/v1/tickets/{id}` | Obtiene el detalle de un ticket de salida por su UUID | `USER`, `ADMIN`, `OPERARIO` |
-| `PATCH` | `/v1/tickets/{ticketId}/lost` | Marca un ticket de salida como extraviado/perdido (IN-22) | `ADMIN`, `OPERARIO` |
 | `GET` | `/actuator/health` | Probes de salud del servicio (Liveness / Readiness) | Público |
 
 ## Eventos publicados y consumidos
