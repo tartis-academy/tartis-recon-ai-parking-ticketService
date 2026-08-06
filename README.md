@@ -13,7 +13,7 @@
    - Mantiene la relación de dominio **IN-20** (relación 1:1 entre una estancia `stayId` y su `Ticket` final de cobro).
    - Soporta generación síncrona vía REST (`POST /v1/tickets`) y asíncrona mediante el consumo de eventos `StayClosedEvent` desde RabbitMQ.
    - **Gestión de Tickets Perdidos (IN-22):** Endpoint `PATCH /v1/tickets/{ticketId}/lost` para marcar un ticket como extraviado o perdido.
-   - **Publicación de Eventos:** Emisión del evento `TicketChangedEvent` tras modificaciones o emisión de tickets.
+   - **Publicación de Eventos:** Emisión del evento `TicketChangedEvent` tras modificaciones o emisión de tickets (`TicketEventPublisherAdapter`).
 
 ---
 
@@ -62,7 +62,7 @@ Todos los endpoints requieren autenticación mediante Bearer Access Token (emiti
 ## 4. Eventos publicados y consumidos
 
 ### Eventos Publicados en RabbitMQ:
-- **`TicketChangedEvent`:** Emite eventos de notificación a RabbitMQ tras la creación o actualización de tickets (`TicketEventPublisherAdapter` / `TicketChangedEventRelay`).
+- **`TicketChangedEvent`:** Emite eventos de notificación a RabbitMQ tras la creación o actualización de tickets (`TicketEventPublisherAdapter` / `TicketChangedEventRelay`). Especificado en `docs/asyncapi.yaml`.
 
 ### Eventos Consumidos de RabbitMQ:
 - **`StayClosedEvent`:** Escucha en la cola `ticket-service-stay-closed-queue` (Exchange `stay.events`, routing key `stay.closed`). Al recibir un evento de cierre de estancia, genera automáticamente el ticket de salida.
