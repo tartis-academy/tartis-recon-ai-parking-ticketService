@@ -4,8 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Cierra la regresion del incidente del exchange: ticket-service lo declaraba
@@ -70,7 +74,23 @@ class RabbitMQConfigTest {
         assertEquals("ticket-service-stay-closed-dlx", dlqBinding.getExchange());
         assertEquals("ticket-service-stay-closed-dead-letter", dlqBinding.getRoutingKey());
 
-        org.springframework.amqp.rabbit.core.RabbitTemplate mockTemplate = org.mockito.Mockito.mock(org.springframework.amqp.rabbit.core.RabbitTemplate.class);
-        org.junit.jupiter.api.Assertions.assertNotNull(config.messageRecoverer(mockTemplate));
+        RabbitTemplate mockTemplate = mock(RabbitTemplate.class);
+        assertNotNull(config.messageRecoverer(mockTemplate));
+    }
+
+    /**
+     * Solo comprueba el cableado del callback. Que el callback llegue a
+     * ejecutarse depende ademas de dos propiedades, que se cubren en
+     * {@link RabbitPublisherReturnsPropertiesTest}.
+     */
+    @Test
+    void debeEngancharElCallbackDeMensajesDevueltosAlTemplate() {
+        RabbitTemplate mockTemplate = mock(RabbitTemplate.class);
+        UnroutableEventLogger callback = config.unroutableEventLogger();
+
+        config.returnsCallbackCustomizer(callback).customize(mockTemplate);
+
+        assertNotNull(callback);
+        verify(mockTemplate).setReturnsCallback(callback);
     }
 }

@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketCreateDTO;
 import com.tartis_recon_ai_parking.application.entryticket.dto.EntryTicketDTO;
 import com.tartis_recon_ai_parking.application.entryticket.port.output.EntryTicketPersistence;
+import com.tartis_recon_ai_parking.application.ticket.dto.TicketChangedEvent;
+import com.tartis_recon_ai_parking.application.ticket.port.output.TicketEventPublisher;
 import com.tartis_recon_ai_parking.domain.entryticket.EntryTicket;
 import com.tartis_recon_ai_parking.domain.entryticket.exception.InvalidEntryTicketException;
 
@@ -28,11 +30,17 @@ class CreateEntryTicketUseCaseTest {
     @Mock
     private EntryTicketPersistence entryTicketPersistence;
 
+    @Mock
+    private TicketEventPublisher ticketEventPublisher;
+
     @InjectMocks
     private CreateEntryTicketUseCase createEntryTicketUseCase;
 
     @Captor
     private ArgumentCaptor<EntryTicket> ticketCaptor;
+
+    @Captor
+    private ArgumentCaptor<TicketChangedEvent> eventCaptor;
 
     @Test
     @DisplayName("Debe instanciar el dominio y guardarlo correctamente a traves del puerto")
@@ -76,5 +84,30 @@ class CreateEntryTicketUseCaseTest {
 
         // Validar que no se llega a guardar nada
         verify(entryTicketPersistence, never()).save(any());
+        verify(ticketEventPublisher, never()).publish(any());
+    }
+
+    @Test
+    @DisplayName("Debe publicar un TicketChangedEvent con estado CREATED y los datos del ticket guardado")
+    void shouldPublishTicketChangedEventOnCreate() throws InvalidEntryTicketException {
+        UUID stayId = UUID.randomUUID();
+        EntryTicketCreateDTO createDTO = new EntryTicketCreateDTO(stayId);
+        when(entryTicketPersistence.save(any(EntryTicket.class))).thenAnswer(i -> i.getArgument(0));
+
+        createEntryTicketUseCase.execute(createDTO);
+
+        verify(entryTicketPersistence).save(ticketCaptor.capture());
+        verify(ticketEventPublisher).publish(eventCaptor.capture());
+
+        EntryTicket saved = ticketCaptor.getValue();
+        TicketChangedEvent event = eventCaptor.getValue();
+        assertThat(event.type()).isEqualTo("TicketChangedEvent");
+        assertThat(event.version()).isEqualTo("v1");
+        assertThat(event.data().ticketId()).isEqualTo(saved.getUniqueId());
+        assertThat(event.data().stayId()).isEqualTo(stayId);
+        assertThat(event.data().code()).isEqualTo(saved.getCode());
+        assertThat(event.data().issuedAt()).isEqualTo(saved.getIssuedAt());
+        assertThat(event.data().status()).isEqualTo("CREATED");
+        assertThat(event.data().amount()).isNull();
     }
 }
