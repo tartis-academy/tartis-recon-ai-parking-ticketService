@@ -66,7 +66,7 @@ Todos los endpoints requieren autenticación mediante Bearer Access Token (emiti
 
 ### Eventos Consumidos de RabbitMQ:
 - **`StayClosedEvent`:** Escucha en la cola `ticket-service-stay-closed-queue` (Exchange `stay.events`, routing key `stay.closed`). Al recibir un evento de cierre de estancia, genera automáticamente el ticket de salida.
-- **Idempotencia (IN-20):** Si el ticket ya existe (`TicketAlreadyExistsException` o violación de restricción `uk_stay_id` en BD), el evento se confirma (`ACK`) registrando un aviso en el log para no duplicar tickets ni bloquear la cola.
+- **Idempotencia (IN-20):** Protección contra duplicados mediante verificación previa (`TicketAlreadyExistsException`) y restricción de unicidad en BD (`uk_stay_id`). Si el evento reaparece, se emite un log de advertencia y se confirma la recepción (ACK).
 - **Resiliencia & Dead Letter Queue (DLQ):** 6 reintentos exponenciales. Los mensajes fallidos se desvían a la cola `ticket-service-stay-closed-dlq`.
 
 ---
@@ -80,6 +80,8 @@ Todos los endpoints requieren autenticación mediante Bearer Access Token (emiti
 | `DB_HOST` | Host de la BD compartida de desarrollo | `localhost` | Dev |
 | `DB_PORT` | Puerto de la BD compartida | `5432` | Dev |
 | `DB_NAME` | Nombre de la BD de desarrollo | `parking_dev` | Dev |
+| `DB_USER` | Usuario de la BD de desarrollo | `parking_dev` | Dev |
+| `DB_PASSWORD` | Contraseña de la BD de desarrollo | `change.me` | Dev |
 | `TICKET_DB_HOST` | Host de la BD dedicada de tickets | `parking-ticket-postgres` | Prod / Aislado |
 | `TICKET_DB_PORT` | Puerto del host para la BD dedicada | `5436` (externo) / `5432` (interno) | Prod / Aislado |
 | `TICKET_DB_NAME` | Nombre de la BD dedicada | `ticket_db` | Prod / Aislado |
@@ -111,3 +113,19 @@ mvn spring-boot:run
    ```bash
    mvn spring-boot:run -Dspring-boot.run.profiles=prod
    ```
+
+---
+
+## 7. Migraciones de base de datos (Flyway)
+
+El esquema ya no se crea a mano ni con un `schema.sql` montado como init script: `V1__init.sql` (en `backend/ticket-service/src/main/resources/db/migration`) es la baseline, y Flyway la aplica solo al arrancar la app contra la BD dedicada (perfil `prod`). En dev, Flyway está desactivado (`spring.flyway.enabled=false` en `application-dev.properties`): el Postgres compartido con 5 schemas sigue gestionado por `ddl-auto=update`, fuera del alcance de esta migración.
+
+Para añadir un cambio de esquema: crea `V2__descripcion.sql` (nunca edites `V1__init.sql` una vez desplegado) en la misma carpeta, con el DDL nuevo. Flyway lo detecta y lo aplica en el siguiente arranque.
+
+---
+
+## 8. Escaneo de imagen (Trivy)
+
+El job `docker-scan` de la CI construye la imagen final del Dockerfile y la escanea con [Trivy](https://trivy.dev/). El informe completo (`CRITICAL` + `HIGH`) se publica siempre en la pestaña **Security** del repo; solo una vulnerabilidad `CRITICAL` hace fallar el job.
+
+Si una `CRITICAL` no tiene fix disponible todavía y hay que aceptar el riesgo de forma consciente, se ignora explícitamente añadiendo su CVE a un `.trivyignore` en la raíz del repo (no existe ninguno hoy).
