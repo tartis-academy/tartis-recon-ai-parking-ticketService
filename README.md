@@ -1,131 +1,101 @@
 # tartis-recon-ai-parking — ticket-service
 
-## 1. Responsabilidad del microservicio
+## Responsabilidad del microservicio
 
-`ticket-service` es el microservicio encargado de la emisión, gestión y almacenamiento de los **Tickets del sistema de parking** en el ecosistema **TARTIS Recon-AI**, abarcando dos entidades y dominios bien diferenciados:
+`ticket-service` es el microservicio encargado de la gestión, emisión y almacenamiento de los **Tickets del sistema de parking**, abarcando dos entidades y dominios bien diferenciados:
 
 1. **Tickets de Entrada (`EntryTicket`):**
-   - Emitidos síncronamente durante el check-in de un vehículo.
-   - Registra el código de barras único del ticket, la fecha y hora de entrada y la vinculación con la estancia (`stayId`).
+   - Emitidos en el momento del registro de entrada (check-in) de un vehículo.
+   - Almacena el código alfanumérico único del ticket de entrada, la fecha/hora de entrada y la vinculación con la estancia (`stayId`).
 
 2. **Tickets de Salida / Cobro (`Ticket`):**
-   - Emitidos al finalizar la estancia para registrar el importe total cobrado.
+   - Emitidos al finalizar la estancia (check-out) para registrar el importe total a cobrar y el resumen del cierre.
    - Mantiene la relación de dominio **IN-20** (relación 1:1 entre una estancia `stayId` y su `Ticket` final de cobro).
    - Soporta generación síncrona vía REST (`POST /v1/tickets`) y asíncrona mediante el consumo de eventos `StayClosedEvent` desde RabbitMQ.
-   - **Gestión de Tickets Perdidos (IN-22):** Endpoint `PATCH /v1/tickets/{ticketId}/lost` para marcar un ticket como extraviado o perdido.
-   - **Publicación de Eventos:** Emisión del evento `TicketChangedEvent` tras modificaciones o emisión de tickets.
 
----
+## Endpoints expuestos
 
-## 2. Endpoints expuestos
-
-Todos los endpoints requieren autenticación mediante Bearer Access Token (emitido por Keycloak), exceptuando las sondas públicas de salud.
+Todos los endpoints requieren autenticación mediante Bearer Token (Access Token emitido por Keycloak), exceptuando el probe público de salud.
 
 ### Endpoints de Tickets de Entrada (`/v1/entry-tickets`)
 
-| Método | Endpoint | Descripción | Roles Autorizados (RBAC SEC-03) | Respuesta Exitosa |
-|---|---|---|---|---|
-| `POST` | `/v1/entry-tickets` | Crea un nuevo ticket de entrada asociado a un check-in | `ADMIN`, `OPERARIO` | `201 Created` (`EntryTicketResponse`) |
-| `GET` | `/v1/entry-tickets` | Obtiene el listado completo de tickets de entrada | `ADMIN` | `200 OK` (`List<EntryTicketResponse>`) |
-| `GET` | `/v1/entry-tickets/{id}/code` | Consulta un ticket de entrada por su UUID | `USER`, `ADMIN`, `OPERARIO` | `200 OK` (`EntryTicketResponse`) |
-| `PUT` | `/v1/entry-tickets/{id}` | Actualiza los datos de un ticket de entrada existente | `ADMIN` | `200 OK` (`EntryTicketResponse`) |
+| Método | Endpoint | Descripción | Roles Autorizados |
+|---|---|---|---|
+| `POST` | `/v1/entry-tickets` | Crea un nuevo ticket de entrada asociado a un check-in | `ADMIN`, `OPERARIO` |
+| `GET` | `/v1/entry-tickets` | Obtiene el listado completo de tickets de entrada | `ADMIN` |
+| `GET` | `/v1/entry-tickets/{id}/code` | Consulta un ticket de entrada por su UUID | `USER`, `ADMIN`, `OPERARIO` |
+| `PUT` | `/v1/entry-tickets/{id}` | Actualiza los datos de un ticket de entrada existente | `ADMIN` |
 
 ### Endpoints de Tickets de Salida / Cobro (`/v1/tickets`)
 
-| Método | Endpoint | Descripción | Roles Autorizados (RBAC SEC-03) | Respuesta Exitosa |
-|---|---|---|---|---|
-| `POST` | `/v1/tickets` | Genera síncronamente un ticket de salida/cobro (relación 1:1 IN-20) | `ADMIN`, `OPERARIO` | `201 Created` (`TicketResponse`) |
-| `GET` | `/v1/tickets` | Listado paginado de tickets de salida | `ADMIN` | `200 OK` (`List<TicketResponse>`) |
-| `GET` | `/v1/tickets/{id}` | Obtiene el detalle de un ticket de salida por su UUID | `USER`, `ADMIN`, `OPERARIO` | `200 OK` (`TicketResponse`) |
-| `PATCH` | `/v1/tickets/{ticketId}/lost` | Marca un ticket de salida como extraviado/perdido (IN-22) | `ADMIN`, `OPERARIO` | `200 OK` (`TicketResponse`) |
-| `GET` | `/actuator/health` | Probes de salud del servicio (Liveness / Readiness) | Público | `200 OK` |
+| Método | Endpoint | Descripción | Roles Autorizados |
+|---|---|---|---|
+| `POST` | `/v1/tickets` | Genera un ticket de salida/cobro (relación 1:1 IN-20 con `stayId`) | `ADMIN`, `OPERARIO` |
+| `GET` | `/v1/tickets` | Listado paginado de tickets de salida (búsqueda por `stayId` o término) | `ADMIN` |
+| `GET` | `/v1/tickets/{id}` | Obtiene el detalle de un ticket de salida por su UUID | `USER`, `ADMIN`, `OPERARIO` |
+| `GET` | `/actuator/health` | Probes de salud del servicio (Liveness / Readiness) | Público |
 
----
+## Eventos publicados y consumidos
 
-## 3. Casos de Uso (Arquitectura Hexagonal)
+Este microservicio combina recepción de llamadas REST síncronas con consumo de eventos de dominio asíncronos.
 
-### Dominios y Casos de Uso:
-- **`CreateEntryTicketUseCase`:** Genera un ticket de entrada asignando su código alfanumérico único.
-- **`GetEntryTicketByCodeUseCase` / `GetEntryTicketUseCase`:** Consulta tickets de entrada por código de barras o UUID.
-- **`ListEntryTicketsUseCase` / `UpdateEntryTicketUseCase`:** Gestión y actualización de tickets de entrada.
-- **`CreateTicketUseCase`:** Crea un ticket de cobro final verificando que no exista uno previo para la misma estancia (IN-20).
-- **`GetTicketByCodeUseCase` / `GetTicketUseCase`:** Búsqueda de tickets de cobro.
-- **`ListTicketsUseCase`:** Recuperación de listados de tickets de salida.
-- **`MarkTicketAsLostUseCase`:** Aplica la marca de ticket extraviado (IN-22).
+- **Eventos publicados en RabbitMQ:** Ninguno.
+- **Eventos consumidos de RabbitMQ:**
+  - **`StayClosedEvent`:** Escucha en la cola `ticket-service-stay-closed-queue` (Exchange `stay.events`, routing key `stay.closed`). Al finalizar un check-out en `stay-service`, este servicio procesa el evento y genera de forma asíncrona el ticket de cobro.
+  - **Idempotencia:** Protección contra duplicados mediante verificación previa (`TicketAlreadyExistsException`) y restricción de unicidad en BD (`uk_stay_id`). Si el evento reaparece, se emite un log de advertencia y se confirma la recepción (ACK).
+  - **Resiliencia & Dead Letter Queue (DLQ):** 6 reintentos con backoff exponencial. Tras agotar los reintentos, el mensaje no procesable se envía a la cola muerta `ticket-service-stay-closed-dlq`.
 
-### Puertos de Dominio:
-- **Puertos de Entrada:** REST API (`EntryTicketRestAdapter`, `TicketRestAdapter`), AMQP Listener (`TicketEventListenerAdapter`).
-- **Puertos de Salida:** `EntryTicketPersistence`, `TicketPersistence`, `TicketEventPublisher` (`TicketEventPublisherAdapter`).
-
----
-
-## 4. Eventos publicados y consumidos
-
-### Eventos Publicados en RabbitMQ:
-- **`TicketChangedEvent`:** Emite eventos de notificación a RabbitMQ tras la creación o actualización de tickets (`TicketEventPublisherAdapter` / `TicketChangedEventRelay`).
-
-### Eventos Consumidos de RabbitMQ:
-- **`StayClosedEvent`:** Escucha en la cola `ticket-service-stay-closed-queue` (Exchange `stay.events`, routing key `stay.closed`). Al recibir un evento de cierre de estancia, genera automáticamente el ticket de salida.
-- **Idempotencia (IN-20):** Protección contra duplicados mediante verificación previa (`TicketAlreadyExistsException`) y restricción de unicidad en BD (`uk_stay_id`). Si el evento reaparece, se emite un log de advertencia y se confirma la recepción (ACK).
-- **Resiliencia & Dead Letter Queue (DLQ):** 6 reintentos exponenciales. Los mensajes fallidos se desvían a la cola `ticket-service-stay-closed-dlq`.
-
----
-
-## 5. Variables de entorno
+## Variables de entorno
 
 | Variable | Descripción | Valor por defecto (Dev) | Perfil / Uso |
 |---|---|---|---|
 | `SPRING_PROFILES_ACTIVE` | Perfil activo de Spring Boot | `dev` | `dev` / `prod` |
-| `SERVER_PORT` | Puerto HTTP del servicio | `8084` | Dev / Prod |
 | `DB_HOST` | Host de la BD compartida de desarrollo | `localhost` | Dev |
 | `DB_PORT` | Puerto de la BD compartida | `5432` | Dev |
 | `DB_NAME` | Nombre de la BD de desarrollo | `parking_dev` | Dev |
 | `DB_USER` | Usuario de la BD de desarrollo | `parking_dev` | Dev |
 | `DB_PASSWORD` | Contraseña de la BD de desarrollo | `change.me` | Dev |
-| `TICKET_DB_HOST` | Host de la BD dedicada de tickets | `parking-ticket-postgres` | Prod / Aislado |
-| `TICKET_DB_PORT` | Puerto del host para la BD dedicada | `5436` (externo) / `5432` (interno) | Prod / Aislado |
+| `TICKET_DB_HOST` | Host de la BD dedicada de tickets | — | Prod / Aislado |
+| `TICKET_DB_PORT` | Puerto de la BD dedicada de tickets | `5432` | Prod / Aislado |
 | `TICKET_DB_NAME` | Nombre de la BD dedicada | `ticket_db` | Prod / Aislado |
-| `TICKET_DB_USER` | Usuario de la BD dedicada | `ticket_user` | Prod / Aislado |
-| `TICKET_DB_PASSWORD` | Contraseña de la BD dedicada | `ticket_pass` | Prod / Aislado |
+| `TICKET_DB_USER` | Usuario de la BD dedicada | — | Prod / Aislado |
+| `TICKET_DB_PASSWORD` | Contraseña de la BD dedicada | — | Prod / Aislado |
 | `RABBITMQ_HOST` | Host del broker RabbitMQ | `rabbitmq` | Dev / Prod |
 | `RABBITMQ_USER` | Usuario de autenticación RabbitMQ | `guest` | Dev / Prod |
 | `RABBITMQ_PASSWORD` | Contraseña de autenticación RabbitMQ | `guest` | Dev / Prod |
-| `KEYCLOAK_ISSUER_URI` | URI del emisor de Keycloak | `http://localhost:8180/realms/parking` | Dev / Prod |
+| `KEYCLOAK_ISSUER_URI` | URI del emisor de Keycloak (Issuer URI) | `http://localhost:8180/realms/parking` | Dev / Prod |
 
----
+## Ejecución de forma aislada
 
-## 6. Ejecución de forma aislada
+Para ejecutar y probar `ticket-service` de forma independiente sin depender del resto de microservicios:
 
-### Opción 1: Entorno de Desarrollo (Perfil `dev`)
-```bash
-cd backend/ticket-service
-mvn spring-boot:run
-```
+1. **Opción 1: Entorno de Desarrollo (Perfil `dev`)**
+   Navegar a la carpeta del microservicio y arrancar con Maven:
+   ```bash
+   cd backend/ticket-service
+   mvn spring-boot:run
+   ```
+   *El servicio se conectará al esquema `ticket` del Postgres compartido.*
 
-### Opción 2: Base de Datos Dedicada (Perfil `prod` / Contenedores Aislados)
-1. Arrancar la base de datos PostgreSQL en el puerto `5436`:
+2. **Opción 2: Base de Datos Dedicada (Perfil `prod` / Contenedores Aislados)**
+   Para ejecutar contra una base de datos PostgreSQL exclusiva en puerto `5436`:
    ```bash
    cd backend/ticket-service
    cp .env.example .env
    docker compose up -d
-   ```
-2. Ejecutar la aplicación Spring Boot activando el perfil `prod` para aplicar migraciones Flyway (`V1__init.sql`, `V2__add_entry_tickets_and_uk_stay_id.sql`):
-   ```bash
    mvn spring-boot:run -Dspring-boot.run.profiles=prod
    ```
 
----
+## Migraciones de base de datos (Flyway)
 
-## 7. Migraciones de base de datos (Flyway)
+El esquema ya no se crea a mano ni con un `schema.sql` montado como init
+script: `V1__init.sql` (en `backend/ticket-service/src/main/resources/db/migration`)
+es la baseline, y Flyway la aplica solo al arrancar la app contra la BD
+dedicada (perfil `prod`). En dev, Flyway está desactivado
+(`spring.flyway.enabled=false` en `application-dev.properties`): el Postgres
+compartido con 5 schemas sigue gestionado por `ddl-auto=update`, fuera del
+alcance de esta migración.
 
-El esquema ya no se crea a mano ni con un `schema.sql` montado como init script: `V1__init.sql` (en `backend/ticket-service/src/main/resources/db/migration`) es la baseline, y Flyway la aplica solo al arrancar la app contra la BD dedicada (perfil `prod`). En dev, Flyway está desactivado (`spring.flyway.enabled=false` en `application-dev.properties`): el Postgres compartido con 5 schemas sigue gestionado por `ddl-auto=update`, fuera del alcance de esta migración.
-
-Para añadir un cambio de esquema: crea `V2__descripcion.sql` (nunca edites `V1__init.sql` una vez desplegado) en la misma carpeta, con el DDL nuevo. Flyway lo detecta y lo aplica en el siguiente arranque.
-
----
-
-## 8. Escaneo de imagen (Trivy)
-
-El job `docker-scan` de la CI construye la imagen final del Dockerfile y la escanea con [Trivy](https://trivy.dev/). El informe completo (`CRITICAL` + `HIGH`) se publica siempre en la pestaña **Security** del repo; solo una vulnerabilidad `CRITICAL` hace fallar el job.
-
-Si una `CRITICAL` no tiene fix disponible todavía y hay que aceptar el riesgo de forma consciente, se ignora explícitamente añadiendo su CVE a un `.trivyignore` en la raíz del repo (no existe ninguno hoy).
+Para añadir un cambio de esquema: crea `V2__descripcion.sql` (nunca edites
+`V1__init.sql` una vez desplegado) en la misma carpeta, con el DDL nuevo.
+Flyway lo detecta y lo aplica en el siguiente arranque.
